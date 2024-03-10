@@ -18,10 +18,10 @@ Implementing Linear Regression for Predictive Analysis.
 
 ## Predicting Outcomes
 - Displaying Predicted Values
-- Pre-training models 
+- Pre-training models for various popular companies
 
 ### Useful Resources
-- [API](https://polygon.io/)
+- Polygon Stock Data [API](https://polygon.io/)
 - Graphing Library [Matplot++](https://alandefreitas.github.io/matplotplusplus/)
 - Which Functionalitities to Add [Pandas Python Library](https://pandas.pydata.org/docs/user_guide/index.html)
 - Stock Prediction [Video](https://youtu.be/vuKfuDJQUJk?si=BGrvdMNus1WS_UvA)
