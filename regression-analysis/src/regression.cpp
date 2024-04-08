@@ -1,16 +1,44 @@
-#include<iostream>
-#include<regression.h>
-#include<vector>
 #include<array>
+#include<vector>
+#include<ostream>
+#include<iostream>
+#include<stdexcept>
+#include<regression.h>
 #include<matplot/matplot.h>
 
 using namespace std;
 
-LinearRegression::LinearRegression(vector<double> x, vector<double> y, double learning_rate) 
-    : x{x}, y{y}, m{0}, b{0}, error{0}, learning_rate{learning_rate} 
+void checkNaN(double value, const string& errorMessage) {
+    if (isnan(value)) 
+        throw invalid_argument{errorMessage};
+}
+
+double RegressionEquation(const Model& model, size_t data_point) {
+    double y = 0;
+    for(size_t i = 0; i < model.numFeatures; i++) 
+        y += model.m[i] * model.x[data_point][i];
+    return y + model.b;
+}
+
+double RegressionEquation(const Model& model, const vector<double>& x) {
+    double y = 0;
+    for(size_t i = 0; i < x.size(); i++) 
+        y += model.m[i] * x[i];
+    return y + model.b;
+}
+
+Model::Model(vector<vector<double>> x, vector<double> y, size_t numFeatures, size_t numDataPoints, double learning_rate) 
+    : x{x}, y{y}, b{0}, error{0}, numFeatures{numFeatures}, numDataPoints{numDataPoints}, learning_rate{learning_rate} 
 {
-    double x_min = *min_element(x.begin(), x.end());
-    double x_max = *max_element(x.begin(), x.end());
+
+    m = vector<double>(numFeatures, 0.0);
+    
+    vector<double> x_min(numFeatures), x_max(numFeatures);
+
+    for(size_t i = 0; i < numFeatures; i++) {
+        x_min[i] = *min_element(x[i].begin(), x[i].end());
+        x_max[i] = *max_element(x[i].begin(), x[i].end());
+    }
 
     double y_min = *min_element(y.begin(), y.end());
     double y_max = *max_element(y.begin(), y.end());
@@ -19,74 +47,106 @@ LinearRegression::LinearRegression(vector<double> x, vector<double> y, double le
     output_range = {y_min, y_max};
 }
 
-void LinearRegression::SetLearningRate(double rate) { this->learning_rate = rate; }
-double LinearRegression::GetLearningRate(void) { return this->learning_rate; }
+void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
 
-double LinearRegression::MeanSquaredError(void) { 
+double Model::GetLearningRate(void) const { return this->learning_rate; }
+
+double Model::MeanSquaredError(void) { 
     this->error = 0;
-    for (int i = 0; i < this->y.size(); i++) 
-        this->error += pow((this->y[i] - (this->m * this->x[i] + this->b)), 2);
-    this->error /= this->y.size();
+    for (int i = 0; i < this->numDataPoints; i++) 
+        this->error += pow((this->y[i] - RegressionEquation(*this, i)), 2);
+    this->error /= this->numDataPoints;
 
     return this->error;
 }
 
-double LinearRegression::MeanSquaredError(vector<double> x, vector<double> y) {
+double Model::MeanSquaredError(vector<vector<double>> x, vector<double> y) const {
     double Error = 0;
     for (int i = 0; i < y.size(); i++) 
-        Error += pow((y[i] - (m * x[i] + b)), 2);
+        Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
     Error /= y.size();
 
     return Error;
 }
 
-void LinearRegression::GradientDescent(void) {
-    double m_gradient = 0;
+void Model::GradientDescent(void) {
+    vector<double> m_gradient(numFeatures, 0.0);
     double b_gradient = 0;
-    int n = y.size();
 
-    for (int i = 0; i < n; i++) {
-        m_gradient += -2 * x[i] * (y[i] - (m * x[i] + b));
-        b_gradient += -2 * (y[i] - (m * x[i] + b));
+    for (int i = 0; i < numDataPoints; i++) {
+        double prediction = RegressionEquation(*this, i);
+        for(size_t j = 0; j < numFeatures; j++) 
+            m_gradient[j] += -2 * x[i][j] * (y[i] - prediction);
+
+        b_gradient += -2 * (y[i] - prediction);
     }
 
-    m -= (m_gradient / n) * learning_rate;
-    b -= (b_gradient / n) * learning_rate;
+    for(size_t i = 0; i < m.size(); i++) 
+        m[i] -= (m_gradient[i] / numDataPoints) * learning_rate;
+    b -= (b_gradient / numDataPoints) * learning_rate;
 }
 
-void LinearRegression::Train(int epochs) {
+void Model::Train(int epochs, bool display_batch, int batch_size) {
     for (int i = 0; i < epochs; i++) {
         GradientDescent();
         MeanSquaredError();
-        if (i % 500 == 0)
+        if (display_batch && (i % batch_size == 0)) 
             cout << "Epoch: " << i+1 << " Error: " << error << endl;
     }
     
-    vector<double> input;
+    vector<vector<double>> input(numFeatures);
     vector<double> output;
 
-    for (double i = input_range[0]; i < input_range[1]; i++) {
-        input.push_back(i);
-        output.push_back(m * i + b);
+    for(size_t i = 0; i < numFeatures; i++) {
+        for(double j = input_range[0][i]; j < input_range[1][i]; j++) 
+            input[i].push_back(j);
+        
     }
 
-    matplot::scatter(x, y);
-    matplot::hold(matplot::on); 
-    matplot::plot(input, output);
-    matplot::show(); 
+    for(size_t i = 0; i < y.size(); i++)
+        output.push_back(RegressionEquation(*this, i));
 }
 
-vector<double> LinearRegression::Predict(vector<double> x) {
+void Model::DisplayPlot(void) {
+
+    if (numFeatures == 1) {
+            vector<double> x_line = {input_range[0][0], input_range[1][0]};
+            vector<double> y_line = {m[0]*x_line[0] + b, m[0]*x_line[1] + b};
+
+            matplot::figure();
+            matplot::scatter(x[0], y);
+            matplot::hold(matplot::on);
+            matplot::plot(x_line, y_line);
+            matplot::show();
+
+    } else if (numFeatures == 2) {
+
+            vector<double> x_line = {input_range[0][0], input_range[1][0]};
+            vector<double> y_line = {input_range[0][1], input_range[1][1]};
+            vector<double> z_line = {m[0]*x_line[0] + m[1]*y_line[0] + b, m[0]*x_line[1] + m[1]*y_line[1] + b};
+
+            matplot::figure();
+            matplot::scatter3(x[0], x[1], y);
+            matplot::hold(matplot::on);
+            matplot::plot3(x_line, y_line, z_line);
+            matplot::show();
+    }
+
+}
+
+vector<double> Model::Predict(vector<vector<double>> x) {
     vector<double> predictions;
-    for (auto const &i : x) 
-        predictions.push_back(m * i + b);
+    for (size_t i = 0; i < x.size(); i++) 
+        predictions.push_back(RegressionEquation(*this, x[i]));
 
     return predictions;
 }
 
-void LinearRegression::PrintModel(void) {
-    cout << "Slope: " << m << " Intercept: " << b << endl;
-    // plot the data and the line using matplot++
-    matplot::plot(x, y);
-    matplot::show();
+ostream& operator<<(ostream& output, const Model& model) {
+    output << endl << "Weights: " << endl;
+    for(size_t i = 0; i < model.m.size(); i++) 
+        output << "m" << i << ": " << model.m[i] << endl;
+    output << "Bias: " << model.b << endl;
+
+    return output;
 }
