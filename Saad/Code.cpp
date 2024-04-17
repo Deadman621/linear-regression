@@ -12,19 +12,19 @@ class Data {
 
     vector<vector<double>> x;
     vector<double> y;
-    vector<double> data;
     
+    int MaxVariablesQty;
+    vector<string> NameOfAllVariables;
+    int ColumnIndexForDependentVariable;
 
-    int NumOfIndependents;
-    int MaxVariables;
     public:
-    Data(string Name, int n){
+    Data(string Name){
         fileName = Name;
         ifstream file(fileName, ios::in);
         
-        MaxVariables = MaxNumOfVariables(file);
-        setNumOfIndependents(n);
-        InitializeData(file);
+        MaxVariablesQty = MaxNumOfVariables(file);
+        setDependentVariable();
+        SetData(file);
 
         file.close();
     }
@@ -34,31 +34,27 @@ class Data {
             exit(1);
         }
         string temp;
+        string Var = "";
         int max = 0;
-        while(!file.eof()){
-            getline(file,temp);
-
-            //cout << "temp : " << temp << endl;
-            
-            if (areAllFieldsCorrect(temp)){
-               int count = 0;
-                for (int i = 0 ; i < temp.size(); i++){
-                    if (temp[i] == ','){
-                        count++;
-                    }
-                    if (count > max){
-                        max = count;
-                    }  
-                }
+        getline(file,temp);
+        for(int i = 0 ; i <= temp.length()+1 ; i++){
+            if(temp[i] == ',' || (i == temp.length()+1)){
+                max++;
+                NameOfAllVariables.push_back(Var);
+                Var = "";
+            }else{
+                Var += temp[i];
             }
         }
-        return max + 1;
+        return max;
     }
 
     bool areAllFieldsCorrect(string temp) {
         char prev = '\0'; 
+        char c;
+        int count = 0;
         for (int i = 0; i < temp.size(); i++) {
-            char c = temp[i];
+            c = temp[i];
 
             if (c == ',' && prev == ',') {
                 return false;
@@ -67,7 +63,14 @@ class Data {
                 return false; 
             }
             prev = c;
+            if(c == ','){
+                count++;
+            }
         }
+        if ((count+1) != MaxVariablesQty){
+            return false;
+        }
+        
         return true;
     }
 
@@ -77,56 +80,79 @@ class Data {
         }
         return false;
     }
-    void setNumOfIndependents(int n){
-        while(n >= MaxVariables){
-            cout << "\nNumber of Independents can't exceed or be equals to the total number of variables." << endl;
-            cout << "Enter the number of Independents : ";
-            cin >> n;
+    void setDependentVariable(){
+        cout << "\nSelect the appropriate number for the desired Dependent Variable :- " << endl;
+        int i;
+        for(int i = 0 ; i < MaxVariablesQty ; i++){
+            cout << i+1 << ". " << NameOfAllVariables[i] << endl;
         }
-        NumOfIndependents = n;
+        do {
+            cout << "Enter the number corresponding to the Dependent Variable : ";
+            cin >> i;
+        }while(i < 1 || i > MaxVariablesQty);
+        ColumnIndexForDependentVariable = i-1;
     }
 
-    void InitializeData(ifstream & file){
+    void SetData(ifstream & file){
         if(!file.is_open()){
             cout << "File not found" << endl;
             exit(1);
         }
         string temp;
-        int max = 0;
         file.seekg(0);
         while(!file.eof()){
             getline(file,temp);
+            int ColumnIndex = 0;
+            vector<double> tempX;
             if (areAllFieldsCorrect(temp)){
-               string parts = "";
-                for (int i = 0 ; i <= temp.size(); i++){
-                    
-                    cout << temp[i] << endl;
-                    
+               string digits = "";
+                for (int i = 0 ; i < temp.size() + 1; i++){
+
                     if (((temp[i] >= '0' && temp[i] <= '9') || temp[i] == '.')){
-                        parts += temp[i];
+                        digits += temp[i];
                     }else{
-                        if (parts != ""){
-                            data.push_back(stod(parts));
-                            parts = "";
+                        if (temp[i] == ',' || i == temp.size()){
+                            //cout << ColumnIndex << " ";
+                            if (ColumnIndex == ColumnIndexForDependentVariable){
+                                y.push_back(stod(digits));
+                            }else{
+                                tempX.push_back(stod(digits));
+                            }
+                            digits = "";
+                            ColumnIndex++;
                         }
                     }
                 }
+                x.push_back(tempX);
             }
         }
     }
 
     void DisplayDataAndClassAttributes(){
-        cout << "Data : " << endl;
-        for (int i = 0 ; i < data.size(); i++){
-            cout << data[i] << " ";
+        cout << "\n\nAll Variables :-\n";
+        for(int i = 0 ; i < NameOfAllVariables.size() ; i++){
+            cout << NameOfAllVariables[i] << ", ";
         }
-        cout << "\n\nNumber of Independents : " << NumOfIndependents << endl;
-        cout << "Number of Variables : " << MaxVariables << endl;
+
+        cout << "\n\nX :-\n";
+        for(int i = 0 ; i < x.size() ; i++){
+            for(int j = 0 ; j < x[i].size() ; j++){
+                cout << x[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << "Y :-\n";
+        for(int i = 0 ; i < y.size() ; i++){
+            cout << y[i] << endl;
+        }
+        
+        cout << "\n\nDependent variable : " << NameOfAllVariables[ColumnIndexForDependentVariable] << endl;
+        cout << "Total Number of Variables : " << MaxVariablesQty << endl;
     }
 };
 
 int main() {
-    Data data("data.csv", 1);
+    Data data("Data.csv");
     data.DisplayDataAndClassAttributes();
     return 0;
 }
