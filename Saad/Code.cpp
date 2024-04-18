@@ -5,26 +5,36 @@
 
 using namespace std;
 
-
-class Data {
-    fstream file;
-    string fileName;
+class DataPoint{
 
     vector<vector<double>> x;
     vector<double> y;
     
+    public:
+    DataPoint(){};
+    friend class Data;
+};
+
+class Data {
+    ifstream file;
+    string fileName;
     int MaxVariablesQty;
     vector<string> NameOfAllVariables;
     int ColumnIndexForDependentVariable;
 
+    DataPoint DP;
+    
     public:
     Data(string Name){
         fileName = Name;
-        ifstream file(fileName, ios::in);
-        
+        file.open(fileName);
+        if(!file.is_open()){
+            cout << "File not found" << endl;
+            exit(1);
+        }
         MaxVariablesQty = MaxNumOfVariables(file);
         setDependentVariable();
-        SetData(file);
+        InitializeDataPoints(file);
 
         file.close();
     }
@@ -93,7 +103,7 @@ class Data {
         ColumnIndexForDependentVariable = i-1;
     }
 
-    void SetData(ifstream & file){
+    void InitializeDataPoints(ifstream & file){
         if(!file.is_open()){
             cout << "File not found" << endl;
             exit(1);
@@ -114,7 +124,7 @@ class Data {
                         if (temp[i] == ',' || i == temp.size()){
                             //cout << ColumnIndex << " ";
                             if (ColumnIndex == ColumnIndexForDependentVariable){
-                                y.push_back(stod(digits));
+                                DP.y.push_back(stod(digits));
                             }else{
                                 tempX.push_back(stod(digits));
                             }
@@ -123,27 +133,27 @@ class Data {
                         }
                     }
                 }
-                x.push_back(tempX);
+                DP.x.push_back(tempX);
             }
         }
     }
 
-    void DisplayDataAndClassAttributes(){
+    void DisplayData(){
         cout << "\n\nAll Variables :-\n";
         for(int i = 0 ; i < NameOfAllVariables.size() ; i++){
             cout << NameOfAllVariables[i] << ", ";
         }
 
         cout << "\n\nX :-\n";
-        for(int i = 0 ; i < x.size() ; i++){
-            for(int j = 0 ; j < x[i].size() ; j++){
-                cout << x[i][j] << " ";
+        for(int i = 0 ; i < DP.x.size() ; i++){
+            for(int j = 0 ; j < DP.x[i].size() ; j++){
+                cout << DP.x[i][j] << " ";
             }
             cout << endl;
         }
         cout << "Y :-\n";
-        for(int i = 0 ; i < y.size() ; i++){
-            cout << y[i] << endl;
+        for(int i = 0 ; i < DP.y.size() ; i++){
+            cout << DP.y[i] << endl;
         }
         
         cout << "\n\nDependent variable : " << NameOfAllVariables[ColumnIndexForDependentVariable] << endl;
@@ -153,6 +163,6 @@ class Data {
 
 int main() {
     Data data("Data.csv");
-    data.DisplayDataAndClassAttributes();
+    data.DisplayData();
     return 0;
 }
