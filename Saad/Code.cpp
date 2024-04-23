@@ -95,42 +95,32 @@ class CSVFile : public File {
 
 class DataPoint{
 
-    vector<vector<double>> x;
-    vector<double> y;
+    vector<double> x;
+    double y;
     
     public:
     DataPoint(){};
-    DataPoint(vector<vector<double>> X, vector<double> Y){
+    DataPoint(vector<double> X, double Y){
         x = X;
         y = Y;
     }
-    vector<vector<double>> getX(){
+    vector<double> getX(){
         return x;
     }
-    vector<double> getY(){
+    double getY(){
         return y;
     }
-    vector<double> getX(int i){
+    double getX(int i){
         return x[i];
     }
-    double getY(int i){
-        return y[i];
-    }
-    double getX(int i, int j){
-        return x[i][j];
-    }
+
     void Display(){
+        cout << x[0];
         for (int i = 0; i < x.size(); i++) {
-            cout << x[i][0];
-            for (int j = 1; j < x[i].size(); j++) {
-                cout << ", " << x[i][j];
-            }
+            cout << ", " << x[i];
         }
         cout << " | ";
-        for (int i = 0; i < y.size(); i++) {
-            cout << y[i] << " ";
-        }
-        cout << endl;
+        cout << y << endl;
     }
     friend class Data;
 };
@@ -141,6 +131,8 @@ class Data : public CSVFile {
     int ColumnIndexForDependentVariable;
 
     vector<DataPoint> DP;
+    vector<DataPoint> Training;
+    vector<DataPoint> Testing;
     int NumberOfRows;
     
     public:
@@ -234,8 +226,7 @@ class Data : public CSVFile {
             getline(file,temp);
             int ColumnIndex = 0;
             vector<double> tempX;
-            vector<double> tempY;
-            vector<vector<double>> temp_tempX;
+            double tempY;
             
             if (areAllFieldsCorrect(temp)){
                string digits = "";
@@ -246,7 +237,7 @@ class Data : public CSVFile {
                     }else{
                         if (temp[i] == separator || i == temp.size()){
                             if (ColumnIndex == ColumnIndexForDependentVariable){
-                                tempY.push_back(stod(digits));
+                                tempY = stod(digits);
                             }else{
                                 tempX.push_back(stod(digits));
                             }
@@ -255,24 +246,25 @@ class Data : public CSVFile {
                         }
                     }
                 }
-                temp_tempX.push_back(tempX);
-                DP.push_back(DataPoint(temp_tempX,tempY));
+                DP.push_back(DataPoint(tempX,tempY));
                 NumberOfRows++;
             }
         }
+        NumberOfRows + 1;
     }
 
 
-    vector<vector<DataPoint>> getDividedData(double Percentage){
+    void InitializeTrainingData(double Percentage){
         if (Percentage < 0 || Percentage > 1){
             cout << "Percentage must be between 0 and 1" << endl;
             cout << "Re-enter Percentage : ";
             cin >> Percentage;
-            return getDividedData(Percentage);
-        }else{
-            vector<DataPoint> Training;
-            vector<DataPoint> Testing;
-            int NumOfLines = NumberOfRows * Percentage;
+            return InitializeTrainingData(Percentage);
+        }else{    
+            Training.clear();
+            Testing.clear();
+            double NumOfLines = NumberOfRows * Percentage;
+
             for (int i = 0 ; i < NumberOfRows ; i++){
                 if (i < NumOfLines){
                     Training.push_back(DP[i]);
@@ -280,12 +272,15 @@ class Data : public CSVFile {
                     Testing.push_back(DP[i]);
                 }
             }
-            vector<vector<DataPoint>> temp;
-            temp.push_back(Training);
-            temp.push_back(Testing);
-            return temp;
         }
     }
+    vector<DataPoint> getTrainingDataPoints(){
+        return Training;
+    }
+    vector<DataPoint> getTestingDataPoints(){
+        return Testing;
+    }
+
 
     void DisplayData(){
         cout << "\n\nAll Variables :-\n";
@@ -298,12 +293,9 @@ class Data : public CSVFile {
     for(int i = 0; i < DP.size(); i++) {
         cout << i+1 << ". ";
         for(int j = 0; j < DP[i].x.size(); j++) {
-            cout << DP[i].getX(j,0);
-            for(int k = 1; k < DP[i].getX(j).size(); k++) { // or DP[i].x[j].size();
-                cout << ", " << DP[i].x[j][k]; // or DP[i].getX(j,k); 
-            }
+            cout << DP[i].x[j] << ", ";
         }
-        cout << " | " << DP[i].getY()[0];
+        cout << " | " << DP[i].getY();
         cout << endl;
     }
         
@@ -314,69 +306,22 @@ int main() {
     Data data("Data.csv");
     data.DisplayData();
 
-    vector<vector<DataPoint>> DividedData = data.getDividedData(0.5);
-    cout << "\n\nTraining Data :- \n";
-    //Training data stored at index 0
-    for(int i = 0; i < DividedData[0].size(); i++) {
-        DividedData[0][i].Display();
-    }
+    double TrainingPer = 0.75;
+    data.InitializeTrainingData(TrainingPer); //first call this 
 
-
-
-    int WhichDataPoint = 0; // 0 index = first
-    //first index of DividedData is 0 because we want to get the training data
-    vector<vector<double>> TrainingX_1 = DividedData[0][WhichDataPoint].getX();
-    vector<double> TrainingY_1 = DividedData[0][WhichDataPoint].getY();
-    vector<vector<double>> TrainingX_2 = DividedData[0][WhichDataPoint + 1].getX();
-    vector<double> TrainingY_2 = DividedData[0][WhichDataPoint + 1].getY();
-
-
-    cout << "\n\nTraining Data 1 :- \n";
-    for(int i = 0; i < TrainingX_1.size(); i++) {
-        cout << "x : ";
-        for(int j = 0; j < TrainingX_1[i].size(); j++) {
-            cout << TrainingX_1[i][j] << " ";
-        }
-        cout << "| y : " << TrainingY_1[i];
-    }
-    cout << "\n\nTraining Data 2 :- \n";
-    for(int i = 0; i < TrainingX_2.size(); i++) {
-        cout << "x : ";
-        for(int j = 0; j < TrainingX_2[i].size(); j++) {
-            cout << TrainingX_2[i][j] << " ";
-        }
-        cout << "| y : " << TrainingY_2[i];
+    cout << "\n\nTraining data :- " << endl;
+    vector<DataPoint> ForTraining = data.getTrainingDataPoints(); // then this
+    for(int i = 0 ; i < ForTraining.size() ; i++){
+        ForTraining[i].Display();
     }
     
-    //Testing data stored at index 1
-    cout << "\n\nTesting Data :- \n";
-    for(int i = 0; i < DividedData[1].size(); i++) {
-        DividedData[1][i].Display();
-    }
-    
-    
-    //first index of DividedData is 1 because we want to get the testing data
-    vector<vector<double>> TestingX_1 = DividedData[1][WhichDataPoint].getX();
-    vector<double> TestingY_1 = DividedData[1][WhichDataPoint].getY();
-    vector<vector<double>> TestingX_2 = DividedData[1][WhichDataPoint + 1].getX();
-    vector<double> TestingY_2 = DividedData[1][WhichDataPoint + 1].getY();
-    
-    cout << "\n\nTesting Data 1 :- \n";
-    for(int i = 0; i < TestingX_1.size(); i++) {
-        cout << "x : ";
-        for(int j = 0; j < TestingX_1[i].size(); j++) {
-            cout << TestingX_1[i][j] << " ";
-        }
-        cout << "| y : " << TestingY_1[i];
-    }
-    cout << "\n\nTesting Data 2 :- \n";
-    for(int i = 0; i < TestingX_2.size(); i++) {
-        cout << "x : ";
-        for(int j = 0; j < TestingX_2[i].size(); j++) {
-            cout << TestingX_2[i][j] << " ";
-        }
-        cout << "| y : " << TestingY_2[i];
-    }
+    // ForTesting[numOfDataPoint].getX(WhichXValue);
+    // ForTesting[numOfDataPoint].getY();
 
+    cout << "\n\nTesting data :- " << endl;
+    vector<DataPoint> ForTesting = data.getTestingDataPoints(); // or this
+    for(int i = 0 ; i < ForTesting.size() ; i++){
+        ForTesting[i].Display();
+    }
     return 0;
 }
