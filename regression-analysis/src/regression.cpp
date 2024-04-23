@@ -28,7 +28,10 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
 }
 
 Model::Model(vector<vector<double>> x, vector<double> y, size_t numFeatures, size_t numDataPoints, double learning_rate) 
-    : x{x}, y{y}, b{0}, error{0}, numFeatures{numFeatures}, numDataPoints{numDataPoints}, learning_rate{learning_rate} 
+    : x{x}, y{y}, b{0}, error{0}, 
+      numFeatures{numFeatures}, 
+      numDataPoints{numDataPoints}, 
+      learning_rate{learning_rate} 
 {
 
     m = vector<double>(numFeatures, 0.0);
