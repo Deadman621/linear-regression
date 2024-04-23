@@ -4,6 +4,7 @@ project(LinearRegression VERSION 0.1.0 LANGUAGES C CXX)
 set(SOURCE_FILES
     main.cpp
     regression-analysis/src/regression.cpp
+    Data/src/Code.cpp
 )
 
 set(HEADER_FILES
