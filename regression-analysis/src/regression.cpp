@@ -93,18 +93,6 @@ void Model::Train(int epochs, bool display_batch, int batch_size) {
         if (display_batch && (i % batch_size == 0)) 
             cout << "Epoch: " << i+1 << " Error: " << error << endl;
     }
-    
-    vector<vector<double>> input(numFeatures);
-    vector<double> output;
-
-    for(size_t i = 0; i < numFeatures; i++) {
-        for(double j = input_range[0][i]; j < input_range[1][i]; j++) 
-            input[i].push_back(j);
-        
-    }
-
-    for(size_t i = 0; i < y.size(); i++)
-        output.push_back(RegressionEquation(*this, i));
 }
 
 void Model::DisplayPlot(void) {
