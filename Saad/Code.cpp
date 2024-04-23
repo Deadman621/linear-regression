@@ -321,10 +321,62 @@ int main() {
         DividedData[0][i].Display();
     }
 
+
+
+    int WhichDataPoint = 0; // 0 index = first
+    //first index of DividedData is 0 because we want to get the training data
+    vector<vector<double>> TrainingX_1 = DividedData[0][WhichDataPoint].getX();
+    vector<double> TrainingY_1 = DividedData[0][WhichDataPoint].getY();
+    vector<vector<double>> TrainingX_2 = DividedData[0][WhichDataPoint + 1].getX();
+    vector<double> TrainingY_2 = DividedData[0][WhichDataPoint + 1].getY();
+
+
+    cout << "\n\nTraining Data 1 :- \n";
+    for(int i = 0; i < TrainingX_1.size(); i++) {
+        cout << "x : ";
+        for(int j = 0; j < TrainingX_1[i].size(); j++) {
+            cout << TrainingX_1[i][j] << " ";
+        }
+        cout << "| y : " << TrainingY_1[i];
+    }
+    cout << "\n\nTraining Data 2 :- \n";
+    for(int i = 0; i < TrainingX_2.size(); i++) {
+        cout << "x : ";
+        for(int j = 0; j < TrainingX_2[i].size(); j++) {
+            cout << TrainingX_2[i][j] << " ";
+        }
+        cout << "| y : " << TrainingY_2[i];
+    }
+    
     //Testing data stored at index 1
     cout << "\n\nTesting Data :- \n";
     for(int i = 0; i < DividedData[1].size(); i++) {
         DividedData[1][i].Display();
     }
+    
+    
+    //first index of DividedData is 1 because we want to get the testing data
+    vector<vector<double>> TestingX_1 = DividedData[1][WhichDataPoint].getX();
+    vector<double> TestingY_1 = DividedData[1][WhichDataPoint].getY();
+    vector<vector<double>> TestingX_2 = DividedData[1][WhichDataPoint + 1].getX();
+    vector<double> TestingY_2 = DividedData[1][WhichDataPoint + 1].getY();
+    
+    cout << "\n\nTesting Data 1 :- \n";
+    for(int i = 0; i < TestingX_1.size(); i++) {
+        cout << "x : ";
+        for(int j = 0; j < TestingX_1[i].size(); j++) {
+            cout << TestingX_1[i][j] << " ";
+        }
+        cout << "| y : " << TestingY_1[i];
+    }
+    cout << "\n\nTesting Data 2 :- \n";
+    for(int i = 0; i < TestingX_2.size(); i++) {
+        cout << "x : ";
+        for(int j = 0; j < TestingX_2[i].size(); j++) {
+            cout << TestingX_2[i][j] << " ";
+        }
+        cout << "| y : " << TestingY_2[i];
+    }
+
     return 0;
 }
