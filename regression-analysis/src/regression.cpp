@@ -38,7 +38,7 @@ Model::Model(Data d, double learning_rate)
     if (y.empty() || x.empty()) 
         throw std::runtime_error("dataset is empty");
 
-    this->numFeatures = x.size();
+    this->numFeatures = x[0].size();
     this->numDataPoints = y.size();
 
     m = vector<double>(numFeatures, 0.0);
@@ -93,8 +93,8 @@ void Model::GradientDescent(void) {
     }
 
     for(size_t i = 0; i < m.size(); i++) 
-        m[i] -= (m_gradient[i] / numDataPoints) * learning_rate;
-    b -= (b_gradient / numDataPoints) * learning_rate;
+        m[i] -= m_gradient[i] / numDataPoints * learning_rate;
+    b -= b_gradient / numDataPoints * learning_rate;
 }
 
 void Model::Train(int epochs, bool display_batch, int batch_size) {
