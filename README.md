@@ -3,7 +3,7 @@ Implementing Linear Regression for Predictive Analysis.
 
 ## Data Input & Validation
 - Choice Between Personal Data (csv format) or Fetch from API
-- Read Data from CSV file
+- Reading Data from CSV file
 - Set Number of Independant Variables
 - Select Which Variables
 - Invalid Data Cleaning
