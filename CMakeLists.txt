@@ -4,11 +4,14 @@ project(LinearRegression VERSION 0.1.0 LANGUAGES C CXX)
 set(SOURCE_FILES
     main.cpp
     regression-analysis/src/regression.cpp
-    Data/src/Code.cpp
+    Data/src/Data.cpp
+    Data/src/Analysis.cpp
 )
 
 set(HEADER_FILES
     regression-analysis/include/regression.h
+    Data/include/Data.h
+    Data/include/Analysis.h
 )
 
 include(CTest)
@@ -20,7 +23,7 @@ add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
 target_link_libraries(main PUBLIC matplot)
 
 # Add this line
-target_include_directories(main PUBLIC regression-analysis/include)
+target_include_directories(main PUBLIC regression-analysis/include Data/include)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})
 set(CPACK_PROJECT_VERSION ${PROJECT_VERSION})

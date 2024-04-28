@@ -1,5 +1,6 @@
 #include<array>
 #include<vector>
+#include<Data.h>
 #include<ostream>
 #include<iostream>
 #include<stdexcept>
@@ -14,9 +15,11 @@ void checkNaN(double value, const string& errorMessage) {
 }
 
 double RegressionEquation(const Model& model, size_t data_point) {
+    vector<vector<double>> x = model.data.getTestingX();
+
     double y = 0;
     for(size_t i = 0; i < model.numFeatures; i++) 
-        y += model.m[i] * model.x[data_point][i];
+        y += model.m[i] * x[data_point][i];
     return y + model.b;
 }
 
@@ -27,12 +30,15 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
     return y + model.b;
 }
 
-Model::Model(vector<vector<double>> x, vector<double> y, size_t numFeatures, size_t numDataPoints, double learning_rate) 
-    : x{x}, y{y}, b{0}, error{0}, 
+Model::Model(Data d, size_t numFeatures, size_t numDataPoints, double learning_rate) 
+    : data{d}, b{0}, error{0}, 
       numFeatures{numFeatures}, 
       numDataPoints{numDataPoints}, 
       learning_rate{learning_rate} 
 {
+
+    vector<vector<double>> x = data.getTestingX();
+    vector<double> y = data.getTestingY();
 
     m = vector<double>(numFeatures, 0.0);
     
@@ -57,13 +63,16 @@ double Model::GetLearningRate(void) const { return this->learning_rate; }
 double Model::MeanSquaredError(void) { 
     this->error = 0;
     for (int i = 0; i < this->numDataPoints; i++) 
-        this->error += pow((this->y[i] - RegressionEquation(*this, i)), 2);
+        this->error += pow((this->data.getTestingY()[i] - RegressionEquation(*this, i)), 2);
     this->error /= this->numDataPoints;
 
     return this->error;
 }
 
-double Model::MeanSquaredError(vector<vector<double>> x, vector<double> y) const {
+double Model::MeanSquaredError(const Data& d) const {
+    vector<vector<double>> x = d.getTestingX();
+    vector<double> y = d.getTestingY();
+
     double Error = 0;
     for (int i = 0; i < y.size(); i++) 
         Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
@@ -73,6 +82,10 @@ double Model::MeanSquaredError(vector<vector<double>> x, vector<double> y) const
 }
 
 void Model::GradientDescent(void) {
+
+    vector<vector<double>> x = data.getTestingX();
+    vector<double> y = data.getTestingY();
+    
     vector<double> m_gradient(numFeatures, 0.0);
     double b_gradient = 0;
 
@@ -106,11 +119,14 @@ void Model::Train(int epochs, bool display_batch, int batch_size) {
         
     }
 
-    for(size_t i = 0; i < y.size(); i++)
+    for(size_t i = 0; i < data.getTestingY().size(); i++)
         output.push_back(RegressionEquation(*this, i));
 }
 
 void Model::DisplayPlot(void) {
+
+    vector<vector<double>> x = data.getTestingX();
+    vector<double> y = data.getTestingY();
 
     if (numFeatures == 1) {
             vector<double> x_line = {input_range[0][0], input_range[1][0]};
@@ -137,10 +153,10 @@ void Model::DisplayPlot(void) {
 
 }
 
-vector<double> Model::Predict(vector<vector<double>> x) {
+vector<double> Model::Predict(const Data& d) {
     vector<double> predictions;
-    for (size_t i = 0; i < x.size(); i++) 
-        predictions.push_back(RegressionEquation(*this, x[i]));
+    for (size_t i = 0; i < data.getTrainingX().size(); i++) 
+        predictions.push_back(RegressionEquation(*this, d.getTrainingX()[i]));
 
     return predictions;
 }
