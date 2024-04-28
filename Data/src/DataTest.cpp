@@ -1,4 +1,7 @@
 #include<Data.h>
+#include<iostream>
+
+using namespace std;
 
 int main(void) {
     Data data("Data.csv");

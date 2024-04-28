@@ -130,13 +130,13 @@ bool Data::isCharValid(char c) {
 }
 
 void Data::setDependentVariable() {
-    cout << "\nSelect the appropriate number for the desired Dependent Variable :- " << endl;
+    cout << endl << "Select the appropriate number for the desired Dependent Variable: " << endl;
     int i;
     for(int i = 0 ; i < MaxVariablesQty ; i++){
         cout << i+1 << ". " << NameOfAllVariables[i] << endl;
     }
     do {
-        cout << "Enter the number corresponding to the Dependent Variable : ";
+        cout << "Enter the number corresponding to the Dependent Variable: ";
         i = 6;
         cin >> i;
     }while(i < 1 || i > MaxVariablesQty);

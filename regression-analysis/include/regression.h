@@ -16,6 +16,8 @@ class Model {
         std::vector<double> m;
         std::array<std::vector<double>, 2> input_range;
         std::array<double, 2> output_range;
+        std::vector<std::vector<double>> x;
+        std::vector<double> y;
         Data data;
         void GradientDescent(void);
 
@@ -24,7 +26,7 @@ class Model {
     friend std::ostream& operator<<(std::ostream& output, const Model& model);
 
     public:
-        Model(Data data, std::size_t numFeatures, std::size_t numDataPoints, double learning_rate = 0.0001);
+        Model(Data data, double learning_rate = 0.0001);
         double MeanSquaredError(void);
         double MeanSquaredError(const Data&) const;
         void SetLearningRate(double rate);
