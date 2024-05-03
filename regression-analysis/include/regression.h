@@ -7,6 +7,13 @@
 #define REGRESSION_H
 
 class Model {
+public:
+    virtual double MeanSquaredError() = 0;
+    virtual void Train(int epochs, bool display_batch = false, int batch_size = 0) = 0;
+    virtual std::vector<double> Predict(const Data&) = 0;
+};
+
+class RegressionModel : public Model {
     private:
         double b;
         double error;
@@ -21,12 +28,12 @@ class Model {
         Data data;
         void GradientDescent(void);
 
-    friend double RegressionEquation(const Model& model, size_t data_point);
-    friend double RegressionEquation(const Model& model, const std::vector<double>& x);
-    friend std::ostream& operator<<(std::ostream& output, const Model& model);
+    friend double RegressionEquation(const RegressionModel& model, size_t data_point);
+    friend double RegressionEquation(const RegressionModel& model, const std::vector<double>& x);
+    friend std::ostream& operator<<(std::ostream& output, const RegressionModel& model);
 
     public:
-        Model(Data data, double learning_rate = 0.0001);
+        RegressionModel(Data data, double learning_rate = 0.0001);
         double MeanSquaredError(void);
         double MeanSquaredError(const Data&) const;
         void SetLearningRate(double rate);

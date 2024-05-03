@@ -14,21 +14,21 @@ void checkNaN(double value, const string& errorMessage) {
         throw invalid_argument{errorMessage};
 }
 
-double RegressionEquation(const Model& model, size_t data_point) {
+double RegressionEquation(const RegressionModel& model, size_t data_point) {
     double y = 0;
     for(size_t i = 0; i < model.numFeatures; i++) 
         y += model.m[i] * model.x[data_point][i];
     return y + model.b;
 }
 
-double RegressionEquation(const Model& model, const vector<double>& x) {
+double RegressionEquation(const RegressionModel& model, const vector<double>& x) {
     double y = 0;
     for(size_t i = 0; i < x.size(); i++) 
         y += model.m[i] * x[i];
     return y + model.b;
 }
 
-Model::Model(Data d, double learning_rate) 
+RegressionModel::RegressionModel(Data d, double learning_rate) 
     : data{d}, b{0}, error{0}, 
       learning_rate{learning_rate} 
 {
@@ -58,11 +58,11 @@ Model::Model(Data d, double learning_rate)
     output_range = {y_min, y_max};
 }
 
-void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
+void RegressionModel::SetLearningRate(double rate) { this->learning_rate = rate; }
 
-double Model::GetLearningRate(void) const { return this->learning_rate; }
+double RegressionModel::GetLearningRate(void) const { return this->learning_rate; }
 
-double Model::MeanSquaredError(void) { 
+double RegressionModel::MeanSquaredError(void) { 
     this->error = 0;
     for (int i = 0; i < this->numDataPoints; i++) 
         this->error += pow((this->y[i] - RegressionEquation(*this, i)), 2);
@@ -71,7 +71,7 @@ double Model::MeanSquaredError(void) {
     return this->error;
 }
 
-double Model::MeanSquaredError(const Data& d) const {
+double RegressionModel::MeanSquaredError(const Data& d) const {
     double Error = 0;
     for (int i = 0; i < y.size(); i++) 
         Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
@@ -80,7 +80,7 @@ double Model::MeanSquaredError(const Data& d) const {
     return Error;
 }
 
-void Model::GradientDescent(void) {
+void RegressionModel::GradientDescent(void) {
     vector<double> m_gradient(numFeatures, 0.0);
     double b_gradient = 0;
 
@@ -97,7 +97,7 @@ void Model::GradientDescent(void) {
     b -= b_gradient / numDataPoints * learning_rate;
 }
 
-void Model::Train(int epochs, bool display_batch, int batch_size) {
+void RegressionModel::Train(int epochs, bool display_batch, int batch_size) {
     for (int i = 0; i < epochs; i++) {
         GradientDescent();
         MeanSquaredError();
@@ -107,7 +107,7 @@ void Model::Train(int epochs, bool display_batch, int batch_size) {
     }
 }
 
-void Model::DisplayPlot(void) {
+void RegressionModel::DisplayPlot(void) {
 
     if (numFeatures == 1) {
             vector<double> x_line = {input_range[0][0], input_range[1][0]};
@@ -134,7 +134,7 @@ void Model::DisplayPlot(void) {
 
 }
 
-vector<double> Model::Predict(const Data& d) {
+vector<double> RegressionModel::Predict(const Data& d) {
     vector<double> predictions;
     vector<vector<double>> test = d.getTestingX();
     for (size_t i = 0; i < test.size(); i++) 
@@ -143,7 +143,7 @@ vector<double> Model::Predict(const Data& d) {
     return predictions;
 }
 
-ostream& operator<<(ostream& output, const Model& model) {
+ostream& operator<<(ostream& output, const RegressionModel& model) {
     output << endl << "Weights: " << endl;
     for(size_t i = 0; i < model.m.size(); i++) 
         output << "m" << i << ": " << model.m[i] << endl;

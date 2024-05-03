@@ -13,6 +13,7 @@ class File {
     std::ifstream file;
     std::string fileName;
     std::string Type;
+
     public:
     File(std::string n, std::string t);
     ~File();
@@ -21,8 +22,10 @@ class File {
 class CSVFile : public File {
     protected:
     const char separator;
+
     public:
     CSVFile(std::string n = "");
+    virtual void DisplayData() const = 0;
 };
 
 class DataPoint{
@@ -64,7 +67,7 @@ class Data : public CSVFile {
     std::vector<double> getTestingY() const;
     std::vector<std::vector<double>> getTrainingX() const;
     std::vector<double> getTrainingY() const;
-    void DisplayData() const;
+    void DisplayData() const override;
 };
 
 #endif

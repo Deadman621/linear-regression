@@ -1,8 +1,12 @@
 #include <Analysis.h>
+#include<stdexcept>
 
 using namespace std;
 
 double AnalysisTools::Mean(const vector<double>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate mean of empty data set");
+    }
     double sum = 0;
     for (double num : data) {
         sum += num;
@@ -11,21 +15,27 @@ double AnalysisTools::Mean(const vector<double>& data) {
 }
 
 double AnalysisTools::Variance(const vector<double>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate variance of empty data set");
+    }
     double mean = Mean(data);
     double sum = 0;
     for (int i = 0; i < data.size(); i++) {
         sum += (data[i] - mean) * (data[i] - mean);
     }
-    return data.empty() ? 0 : (sum / (data.size() - 1));
+    return  (sum / (data.size() - 1));
 }
 
 double AnalysisTools::StandardDeviation(const vector<double>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate standard deviation of empty data set");
+    }
     return sqrt(Variance(data));
 }
 
 double AnalysisTools::Median(const vector<double>& data) {
     if(data.empty()){
-        return 0;
+        throw invalid_argument("Cannot calculate median of empty data set");
     }
     vector<double> copy = data;
     sort(copy.begin(), copy.end());
@@ -37,6 +47,9 @@ double AnalysisTools::Median(const vector<double>& data) {
 }
 
 double AnalysisTools::Mean(const vector<vector<double>>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate mean of empty data set");
+    }
     vector<double> means;
     for (int i = 0; i < data.size(); i++) {
         means.push_back(Mean(data[i]));
@@ -45,6 +58,9 @@ double AnalysisTools::Mean(const vector<vector<double>>& data) {
 }
 
 double AnalysisTools::Variance(const vector<vector<double>>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate variance of empty data set");
+    }
     double OverAllMean = Mean(data);
     double sum = 0;
     for (int i = 0; i < data.size(); i++) {
@@ -56,10 +72,16 @@ double AnalysisTools::Variance(const vector<vector<double>>& data) {
 }
 
 double AnalysisTools::StandardDeviation(const vector<vector<double>>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate standard deviation of empty data set");
+    }
     return sqrt(Variance(data));
 }
 
 double AnalysisTools::Median(const vector<vector<double>>& data) {
+    if(data.empty()){
+        throw invalid_argument("Cannot calculate median of empty data set");
+    }
     vector<double> medians;
     for (int i = 0; i < data.size(); i++) {
         medians.push_back(Median(data[i]));
