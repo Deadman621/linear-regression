@@ -31,41 +31,36 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
 
 Model::Model(Data d, double learning_rate) 
     : data{d}, b{0}, error{0}, 
-      learning_rate{learning_rate} 
+      learning_rate{learning_rate},
+      numBatches{0} 
 {
     tie(this->x, this->y) = data.getTrainingData();
 
-    if (y.empty() || x[0].empty()) 
+    if (y.empty()) 
         throw std::runtime_error("dataset is empty");
+
+    for(auto const& data_point : x) 
+        if (x.empty())
+            throw runtime_error{"datasets are empty"};
 
     this->numFeatures = x[0].size();
     this->numDataPoints = y.size();
 
     m = vector<double>(numFeatures, 0.0);
-    
-    vector<double> x_min(numFeatures), x_max(numFeatures);
 
-    for(size_t i = 0; i < numFeatures; i++) {
-        x_min[i] = *min_element(x[i].begin(), x[i].end());
-        x_max[i] = *max_element(x[i].begin(), x[i].end());
-    }
-
-    double y_min = *min_element(y.begin(), y.end());
-    double y_max = *max_element(y.begin(), y.end());
-
-    input_range = {x_min, x_max};
-    output_range = {y_min, y_max};
 }
 
 void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
 
 double Model::GetLearningRate(void) const noexcept { return this->learning_rate; }
 
-double Model::MeanSquaredError(void) { 
+double Model::MeanSquaredError(size_t start_index, size_t batch_size) { 
     this->error = 0;
-    for (int i = 0; i < this->numDataPoints; i++) 
+    size_t end_index = min(start_index + batch_size, this->y.size());
+    size_t n = end_index - start_index;
+    for (size_t i = start_index; i < end_index; i++) 
         this->error += pow((this->y[i] - RegressionEquation(*this, i)), 2);
-    this->error /= this->numDataPoints;
+    this->error /= n;
 
     return this->error;
 }
@@ -79,30 +74,38 @@ double Model::MeanSquaredError(const Data& d) const {
     return Error;
 }
 
-void Model::GradientDescent(void) {
+void Model::GradientDescent(size_t start_index, size_t batch_size) {
     vector<double> m_gradient(numFeatures, 0.0);
     double b_gradient = 0;
+    size_t end_index = min(start_index + batch_size, this->y.size());
+    size_t n = end_index - start_index;
 
-    for (int i = 0; i < numDataPoints; i++) {
+    for (size_t i = start_index; i < end_index; i++) {
         double prediction = RegressionEquation(*this, i);
         for(size_t j = 0; j < numFeatures; j++) 
-            m_gradient[j] += -2 * x[i][j] * (y[i] - prediction);
+            m_gradient[j] += -(2.0 / n) * x[i][j] * (y[i] - prediction);
 
-        b_gradient += -2 * (y[i] - prediction);
+        b_gradient += -(2.0 / n) * (y[i] - prediction);
     }
 
     for(size_t i = 0; i < m.size(); i++) 
-        m[i] -= m_gradient[i] / numDataPoints * learning_rate;
-    b -= b_gradient / numDataPoints * learning_rate;
+        m[i] -= m_gradient[i] * learning_rate;
+    b -= b_gradient * learning_rate;
 }
 
-void Model::Train(int epochs, bool display_batch, int batch_size) {
-    for (int i = 0; i < epochs; i++) {
-        GradientDescent();
-        MeanSquaredError();
-        if (display_batch && (i % batch_size == 0)) 
-            cout << "Epoch: " << i+1 << " Error: " << error << endl;
-        
+void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
+    if (!(batch_size <= numDataPoints) || (batch_size == 0))
+        throw invalid_argument{"Invalid batch size"};
+
+    for (size_t epoch = 0; epoch < epochs; epoch++) {
+        for (size_t i = 0; i < numDataPoints; i += batch_size) {
+            size_t current_batch_size = min(batch_size, numDataPoints - i);
+            GradientDescent(i, current_batch_size);
+            MeanSquaredError(i, current_batch_size);
+        }
+
+        if (epoch % 500 == 0 && display_batch) 
+            cout << "Epoch: " << epoch << " Error: " << error << endl;
     }
 }
 
@@ -116,28 +119,28 @@ void Model::DisplayPlot(void) {
     }
 
     if (numFeatures == 1) {
-        vector<double> x_line = matplot::linspace(input_range[0][0], input_range[1][0], 100);
-        vector<double> y_line(x_line.size());
-        transform(x_line.begin(), x_line.end(), y_line.begin(), [this](double x) { return m[0]*x + b; });
+        vector<double> x_line = matplot::linspace(matplot::min(x0), matplot::max(x0), numDataPoints);
+        vector<double> y_line = matplot::transform(x_line, [this](auto x_line) { return m[0] * x_line + b; });
 
         matplot::figure();
-        matplot::scatter(x0, y);
         matplot::hold(matplot::on);
+        matplot::scatter(x0, y);
         matplot::plot(x_line, y_line);
         matplot::show();
         cin.get();
 
     } else if (numFeatures == 2) {
-        vector<double> x_line = matplot::linspace(input_range[0][0], input_range[1][0], 100);
-        vector<double> y_line = matplot::linspace(input_range[0][1], input_range[1][1], 100);
-        vector<double> z_line(x_line.size());
-        transform(x_line.begin(), x_line.end(), y_line.begin(), z_line.begin(), [this](double x, double y) { return m[0]*x + m[1]*y + b; });
+        vector<double> x_line = matplot::linspace(matplot::min(x0), matplot::max(x0), numDataPoints);
+        vector<double> y_line = matplot::linspace(matplot::min(x1), matplot::max(x1), numDataPoints);
+        vector<double> z_line = matplot::transform(x_line, y_line, [this](double x, double y) { return m[0]*x + m[1]*y + b; });
 
         matplot::figure();
         matplot::scatter3(x0, x1, y);
         matplot::hold(matplot::on);
         matplot::plot3(x_line, y_line, z_line);
+        matplot::view(-30, 1);
         matplot::show();
+        cin.get();
     } */
 }
 
@@ -168,8 +171,6 @@ bool Model::operator==(const Model& model) const {
         (this->data == model.data) &&
         (this->numFeatures == model.numFeatures) &&
         (this->numDataPoints == model.numDataPoints) &&
-        (this->input_range == model.input_range) &&
-        (this->output_range == model.output_range) &&
         (this->error == model.error) &&
         (this->learning_rate == model.learning_rate)
     }; 
@@ -186,8 +187,6 @@ Model& Model::operator=(const Model& model) {
     this->data = model.data;
     this->numFeatures = model.numFeatures;
     this->numDataPoints = model.numDataPoints;
-    this->input_range = model.input_range;
-    this->output_range = model.output_range;
     this->error = model.error;
     this->learning_rate = model.learning_rate;
 

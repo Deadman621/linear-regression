@@ -11,6 +11,7 @@ set(SOURCE_FILES
 )
 
 set(HEADER_FILES
+    regression-analysis/include/interface.h
     regression-analysis/include/regression.h
     regression-analysis/include/optimization.h
     regression-analysis/include/HyperParameterOptimization.h
@@ -21,12 +22,13 @@ set(HEADER_FILES
 include(CTest)
 enable_testing()
 
-#add_subdirectory(matplotplusplus)
 
 add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
+
 #target_link_libraries(main PUBLIC matplot)
 
-# Add this line
+#add_subdirectory(matplotplusplus)
+
 target_include_directories(main PUBLIC regression-analysis/include Data/include)
 
 set(CPACK_PROJECT_NAME ${PROJECT_NAME})

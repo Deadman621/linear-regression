@@ -140,9 +140,13 @@ void Data::setDependentVariable() {
     }
     do {
         cout << "Enter the number corresponding to the Dependent Variable: ";
-        i = 6;
         cin >> i;
-    }while(i < 1 || i > MaxVariablesQty);
+        if (cin.fail()) {
+            cin.clear(); 
+            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            i = 0;
+        }
+    } while(i < 1 || i > MaxVariablesQty);
     ColumnIndexForDependentVariable = i-1;
 }
 
@@ -185,6 +189,7 @@ void Data::InitializeDataPoints(ifstream & file) {
 }
 
 void Data::InitializeTrainingData(double Percentage) {
+    
     if (Percentage < 0 || Percentage > 1){
         cout << "Percentage must be between 0 and 1" << endl;
         cout << "Re-enter Percentage : ";
@@ -203,6 +208,10 @@ void Data::InitializeTrainingData(double Percentage) {
             }
         }
     }
+}
+
+size_t Data::getNumDataPoints() const {
+    return NumberOfRows;
 }
 
 vector<DataPoint> Data::getTrainingDataPoints() const {

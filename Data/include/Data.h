@@ -71,6 +71,7 @@ class Data : public CSVFile {
     void setDependentVariable();
     void InitializeDataPoints(std::ifstream & file);
     void InitializeTrainingData(double Percentage);
+    std::size_t getNumDataPoints() const;
     std::vector<DataPoint> getTrainingDataPoints() const;
     std::vector<DataPoint> getTestingDataPoints() const;
     std::pair<std::vector<std::vector<double>>, std::vector<double>> getTrainingData() const;

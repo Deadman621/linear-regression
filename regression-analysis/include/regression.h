@@ -6,36 +6,23 @@
 #ifndef REGRESSION_H
 #define REGRESSION_H
 
-class ITrainable {
-    public:
-        virtual void Train(int epochs, bool display_batch, int batch_size) = 0;
-    };
-
-class IEvaluable {
-    public:
-        virtual double MeanSquaredError(void) = 0;
-        virtual double MeanSquaredError(const Data& d) const = 0;
-    };
-
-class IDisplayable {
-    public:
-        virtual void DisplayPlot(void) = 0;
-    };
+#include<Interface.h>
 
 class Model: public ITrainable, public IEvaluable, public IDisplayable {
     private:
+        Data data;
         double b;
         double error;
-        double learning_rate;
         std::size_t numFeatures;
         std::size_t numDataPoints;
+        std::size_t numBatches;
         std::vector<double> m;
-        std::array<std::vector<double>, 2> input_range;
-        std::array<double, 2> output_range;
-        std::vector<std::vector<double>> x;
         std::vector<double> y;
-        Data data;
-        void GradientDescent(void);
+        std::vector<std::vector<double>> x;
+
+    protected:
+        double learning_rate;
+        void GradientDescent(size_t start_index, size_t batch_size);
 
     friend double RegressionEquation(const Model& model, size_t data_point);
     friend double RegressionEquation(const Model& model, const std::vector<double>& x);
@@ -45,19 +32,20 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         Model(Data data, double learning_rate = 0.0001);
         Model(const Model& model);
 
-        virtual double MeanSquaredError(void) override;
+        virtual double MeanSquaredError(size_t start_index, size_t batch_size) override;
         virtual double MeanSquaredError(const Data&) const override;
+
         void SetLearningRate(double rate);
         double GetLearningRate(void) const noexcept; 
-        virtual void Train(int epochs, bool display_batch = false, int batch_size = 0) override;
+
         void DisplayPlot(void);
+        virtual void Train(size_t epochs, size_t batch_size = 50, bool display_batch = false) override;
         std::vector<double> Predict(const Data&) const;
 
         bool operator==(const Model& model) const;
         Model& operator=(const Model& model);
         std::vector<double> operator()(const std::vector<std::vector<double>>&) const;
         std::vector<double> operator()(const Data&) const;
-
 };
 
 #endif
