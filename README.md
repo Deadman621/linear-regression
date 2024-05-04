@@ -21,6 +21,10 @@ Implementing Linear Regression for Predictive Analysis.
 - Displaying Predicted Values
 - Pre-training models for various popular companies
 
+## HyperParameter Optimization
+- Grid Search
+- Random Search
+
 ### Useful Resources
 - Polygon Stock Data [API](https://polygon.io/)
 - Graphing Library [Matplot++](https://alandefreitas.github.io/matplotplusplus/)
