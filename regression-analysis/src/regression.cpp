@@ -6,7 +6,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-#include<matplot/matplot.h>
+//#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -33,10 +33,9 @@ Model::Model(Data d, double learning_rate)
     : data{d}, b{0}, error{0}, 
       learning_rate{learning_rate} 
 {
-    this->x = data.getTrainingX();
-    this->y = data.getTrainingY();
+    tie(this->x, this->y) = data.getTrainingData();
 
-    if (y.empty() || x.empty()) 
+    if (y.empty() || x[0].empty()) 
         throw std::runtime_error("dataset is empty");
 
     this->numFeatures = x[0].size();
@@ -51,7 +50,6 @@ Model::Model(Data d, double learning_rate)
         x_max[i] = *max_element(x[i].begin(), x[i].end());
     }
 
-
     double y_min = *min_element(y.begin(), y.end());
     double y_max = *max_element(y.begin(), y.end());
 
@@ -61,7 +59,7 @@ Model::Model(Data d, double learning_rate)
 
 void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
 
-double Model::GetLearningRate(void) const { return this->learning_rate; }
+double Model::GetLearningRate(void) const noexcept { return this->learning_rate; }
 
 double Model::MeanSquaredError(void) { 
     this->error = 0;
@@ -109,7 +107,7 @@ void Model::Train(int epochs, bool display_batch, int batch_size) {
 }
 
 void Model::DisplayPlot(void) {
-    vector<double> x0, x1;
+/*     vector<double> x0, x1;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -140,12 +138,12 @@ void Model::DisplayPlot(void) {
         matplot::hold(matplot::on);
         matplot::plot3(x_line, y_line, z_line);
         matplot::show();
-    }
+    } */
 }
 
-vector<double> Model::Predict(const Data& d, bool plot) {
+vector<double> Model::Predict(const Data& d) const {
     vector<double> predictions;
-    vector<vector<double>> test = d.getTestingX();
+    vector<vector<double>> test = d.getTestingData().first;
     for (size_t i = 0; i < test.size(); i++) 
         predictions.push_back(RegressionEquation(*this, test[i]));
 
@@ -159,4 +157,51 @@ ostream& operator<<(ostream& output, const Model& model) {
     output << "Bias: " << model.b << endl;
 
     return output;
+}
+
+bool Model::operator==(const Model& model) const {
+    return { 
+        (this->m == model.m) && 
+        (this->b == model.b) && 
+        (this->x == model.x) && 
+        (this->y == model.y) && 
+        (this->data == model.data) &&
+        (this->numFeatures == model.numFeatures) &&
+        (this->numDataPoints == model.numDataPoints) &&
+        (this->input_range == model.input_range) &&
+        (this->output_range == model.output_range) &&
+        (this->error == model.error) &&
+        (this->learning_rate == model.learning_rate)
+    }; 
+} 
+
+Model& Model::operator=(const Model& model) {
+    if (this == &model) 
+        return *this;
+
+    this->m = model.m;
+    this->b = model.b;
+    this->x = model.x;
+    this->y = model.y;
+    this->data = model.data;
+    this->numFeatures = model.numFeatures;
+    this->numDataPoints = model.numDataPoints;
+    this->input_range = model.input_range;
+    this->output_range = model.output_range;
+    this->error = model.error;
+    this->learning_rate = model.learning_rate;
+
+    return *this;
+}
+
+vector<double> Model::operator()(const vector<vector<double>>& x) const {
+    vector<double> predictions;
+    for (size_t i = 0; i < x.size(); i++) 
+        predictions.push_back(RegressionEquation(*this, x[i]));
+
+    return predictions;
+}
+
+vector<double> Model::operator()(const Data& d) const {
+    return Predict(d);
 }

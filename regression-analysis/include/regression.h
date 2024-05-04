@@ -43,13 +43,21 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
 
     public:
         Model(Data data, double learning_rate = 0.0001);
+        Model(const Model& model);
+
         virtual double MeanSquaredError(void) override;
         virtual double MeanSquaredError(const Data&) const override;
         void SetLearningRate(double rate);
-        double GetLearningRate(void) const; 
+        double GetLearningRate(void) const noexcept; 
         virtual void Train(int epochs, bool display_batch = false, int batch_size = 0) override;
         void DisplayPlot(void);
-        std::vector<double> Predict(const Data&, bool plot = false);
+        std::vector<double> Predict(const Data&) const;
+
+        bool operator==(const Model& model) const;
+        Model& operator=(const Model& model);
+        std::vector<double> operator()(const std::vector<std::vector<double>>&) const;
+        std::vector<double> operator()(const Data&) const;
+
 };
 
 #endif

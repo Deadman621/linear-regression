@@ -2,7 +2,6 @@
 
 using namespace std;
 
-// Implementations of File class
 File::File(string n, string t){
     fileName = n;
     Type = t;
@@ -14,10 +13,8 @@ File::~File() {
     }
 }
 
-// Implementations of CSVFile class
 CSVFile::CSVFile(string n) : File(n, "CSV"), separator(',') {}
 
-// Implementations of DataPoint class
 DataPoint::DataPoint(){}
 
 DataPoint::DataPoint(vector<double> X, double Y){
@@ -216,52 +213,79 @@ vector<DataPoint> Data::getTestingDataPoints() const {
     return Testing;
 }
 
-vector<vector <double>> Data::getTestingX() const {
-    vector<vector<double>> X;
-    for (int i = 0; i < Testing.size(); i++) {
-        X.push_back(Testing[i].getX());
+ostream& operator<<(ostream& os, const Data& data) {
+    os << "\n\nAll Variables :-\n";
+    for(int i = 0 ; i < data.NameOfAllVariables.size() ; i++){
+        os << data.NameOfAllVariables[i] << ", ";
     }
-    return X;   
+    os << "\n\nDependent variable : " << data.NameOfAllVariables[data.ColumnIndexForDependentVariable] << endl;
+
+    os << "\nAll data Points :- " << endl;
+    for(int i = 0; i < data.DP.size(); i++) {
+        os << i+1 << ". ";
+        for(int j = 0; j < data.DP[i].x.size(); j++) {
+            os << data.DP[i].x[j] << ", ";
+        }
+        os << " | " << data.DP[i].getY();
+        os << endl;
+    }
+    return os;
 }
 
-vector<double> Data::getTestingY() const {
+pair<vector<vector<double>>, vector<double>> Data::getTrainingData() const {
+    vector<vector<double>> X;
     vector<double> Y;
-    for (int i = 0; i < Testing.size(); i++) {
-        Y.push_back(Testing[i].getY());
-    }
-    return Y;
-}
-
-vector<vector<double>> Data::getTrainingX() const {
-    vector<vector<double>> X;
     for (int i = 0; i < Training.size(); i++) {
         X.push_back(Training[i].getX());
-    }
-    return X;
-}
-
-vector<double> Data::getTrainingY() const {
-    vector<double> Y;
-    for (int i = 0; i < Training.size(); i++) {
         Y.push_back(Training[i].getY());
     }
-    return Y;
+    return make_pair(X, Y);
 }
 
-void Data::DisplayData() const {
-    cout << "\n\nAll Variables :-\n";
-    for(int i = 0 ; i < NameOfAllVariables.size() ; i++){
-        cout << NameOfAllVariables[i] << ", ";
+pair<vector<vector<double>>, vector<double>> Data::getTestingData() const {
+    vector<vector<double>> X;
+    vector<double> Y;
+    for (int i = 0; i < Testing.size(); i++) {
+        X.push_back(Testing[i].getX());
+        Y.push_back(Testing[i].getY());
     }
-    cout << "\n\nDependent variable : " << NameOfAllVariables[ColumnIndexForDependentVariable] << endl;
-
-    cout << "\nAll data Points :- " << endl;
-    for(int i = 0; i < DP.size(); i++) {
-        cout << i+1 << ". ";
-        for(int j = 0; j < DP[i].x.size(); j++) {
-            cout << DP[i].x[j] << ", ";
-        }
-        cout << " | " << DP[i].getY();
-        cout << endl;
+    return make_pair(X, Y);
 }
-} 
+
+bool DataPoint::operator==(const DataPoint& dp) const {
+    return x == dp.x && y == dp.y;
+}
+
+DataPoint& DataPoint::operator=(const DataPoint& dp) {
+    if (this == &dp) {
+        return *this;
+    }
+    x = dp.x;
+    y = dp.y;
+    return *this;
+}
+
+bool Data::operator==(const Data& d) const {
+    return (fileName == d.fileName && Type == d.Type && 
+            MaxVariablesQty == d.MaxVariablesQty && 
+            NameOfAllVariables == d.NameOfAllVariables && 
+            ColumnIndexForDependentVariable == d.ColumnIndexForDependentVariable && 
+            DP == d.DP && Training == d.Training && Testing == d.Testing && 
+            NumberOfRows == d.NumberOfRows);
+}
+
+Data& Data::operator=(const Data& d) {
+    if (this == &d) {
+        return *this;
+    }
+    fileName = d.fileName;
+    Type = d.Type;
+    MaxVariablesQty = d.MaxVariablesQty;
+    NameOfAllVariables = d.NameOfAllVariables;
+    ColumnIndexForDependentVariable = d.ColumnIndexForDependentVariable;
+    DP = d.DP;
+    Training = d.Training;
+    Testing = d.Testing;
+    NumberOfRows = d.NumberOfRows;
+    return *this;
+}

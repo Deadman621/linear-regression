@@ -4,9 +4,16 @@
 #include <vector>
 #include <string>
 #include <fstream>
+#include <ostream>
+#include <array>
 #include <algorithm> // for sort (vector)
 #include <cmath> // for sqrt
 #include <iostream>
+
+class DataPoint;
+class Data;
+class File;
+class CSVFile;
 
 class File {
     protected:
@@ -25,7 +32,6 @@ class CSVFile : public File {
 
     public:
     CSVFile(std::string n = "");
-    virtual void DisplayData() const = 0;
 };
 
 class DataPoint{
@@ -39,7 +45,11 @@ class DataPoint{
     double getY() const;
     double getX(int i) const;
     void Display() const;
+    bool operator==(const DataPoint& d) const;
+    DataPoint& operator=(const DataPoint& d);
+
     friend class Data;
+    friend std::ostream& operator<<(std::ostream& os, const Data& d);
 };
 
 class Data : public CSVFile {
@@ -63,11 +73,12 @@ class Data : public CSVFile {
     void InitializeTrainingData(double Percentage);
     std::vector<DataPoint> getTrainingDataPoints() const;
     std::vector<DataPoint> getTestingDataPoints() const;
-    std::vector<std::vector <double>> getTestingX() const;
-    std::vector<double> getTestingY() const;
-    std::vector<std::vector<double>> getTrainingX() const;
-    std::vector<double> getTrainingY() const;
-    void DisplayData() const override;
+    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTrainingData() const;
+    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTestingData() const;
+    bool operator==(const Data& d) const;
+    Data& operator=(const Data& d);
+
+    friend std::ostream& operator<<(std::ostream& os, const Data& d);
 };
 
 #endif

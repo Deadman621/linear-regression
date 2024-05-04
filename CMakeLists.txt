@@ -21,10 +21,10 @@ set(HEADER_FILES
 include(CTest)
 enable_testing()
 
-add_subdirectory(matplotplusplus)
+#add_subdirectory(matplotplusplus)
 
 add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
-target_link_libraries(main PUBLIC matplot)
+#target_link_libraries(main PUBLIC matplot)
 
 # Add this line
 target_include_directories(main PUBLIC regression-analysis/include Data/include)
