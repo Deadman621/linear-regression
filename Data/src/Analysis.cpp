@@ -4,9 +4,9 @@ using namespace std;
 
 double AnalysisTools::Mean(const vector<double>& data) {
     double sum = 0;
-    for (double num : data) {
+    for (double num : data) 
         sum += num;
-    }
+    
     return data.empty() ? 0 : sum / data.size();
 }
 

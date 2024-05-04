@@ -4,12 +4,16 @@ project(LinearRegression VERSION 0.1.0 LANGUAGES C CXX)
 set(SOURCE_FILES
     main.cpp
     regression-analysis/src/regression.cpp
+    regression-analysis/src/GridSearch.cpp
+    regression-analysis/src/RandomSearch.cpp
     Data/src/Data.cpp
     Data/src/Analysis.cpp
 )
 
 set(HEADER_FILES
     regression-analysis/include/regression.h
+    regression-analysis/include/optimization.h
+    regression-analysis/include/HyperParameterOptimization.h
     Data/include/Data.h
     Data/include/Analysis.h
 )

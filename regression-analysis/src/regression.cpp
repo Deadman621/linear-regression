@@ -1,5 +1,6 @@
 #include<array>
 #include<vector>
+#include<cmath>
 #include<Data.h>
 #include<ostream>
 #include<iostream>
@@ -108,33 +109,41 @@ void Model::Train(int epochs, bool display_batch, int batch_size) {
 }
 
 void Model::DisplayPlot(void) {
+    vector<double> x0, x1;
 
-    if (numFeatures == 1) {
-            vector<double> x_line = {input_range[0][0], input_range[1][0]};
-            vector<double> y_line = {m[0]*x_line[0] + b, m[0]*x_line[1] + b};
-
-            matplot::figure();
-            matplot::scatter(x[0], y);
-            matplot::hold(matplot::on);
-            matplot::plot(x_line, y_line);
-            matplot::show();
-
-    } else if (numFeatures == 2) {
-
-            vector<double> x_line = {input_range[0][0], input_range[1][0]};
-            vector<double> y_line = {input_range[0][1], input_range[1][1]};
-            vector<double> z_line = {m[0]*x_line[0] + m[1]*y_line[0] + b, m[0]*x_line[1] + m[1]*y_line[1] + b};
-
-            matplot::figure();
-            matplot::scatter3(x[0], x[1], y);
-            matplot::hold(matplot::on);
-            matplot::plot3(x_line, y_line, z_line);
-            matplot::show();
+    for (const auto& data_point : x) {
+        x0.push_back(data_point[0]);
+        if (numFeatures == 2) 
+            x1.push_back(data_point[1]);
     }
 
+    if (numFeatures == 1) {
+        vector<double> x_line = matplot::linspace(input_range[0][0], input_range[1][0], 100);
+        vector<double> y_line(x_line.size());
+        transform(x_line.begin(), x_line.end(), y_line.begin(), [this](double x) { return m[0]*x + b; });
+
+        matplot::figure();
+        matplot::scatter(x0, y);
+        matplot::hold(matplot::on);
+        matplot::plot(x_line, y_line);
+        matplot::show();
+        cin.get();
+
+    } else if (numFeatures == 2) {
+        vector<double> x_line = matplot::linspace(input_range[0][0], input_range[1][0], 100);
+        vector<double> y_line = matplot::linspace(input_range[0][1], input_range[1][1], 100);
+        vector<double> z_line(x_line.size());
+        transform(x_line.begin(), x_line.end(), y_line.begin(), z_line.begin(), [this](double x, double y) { return m[0]*x + m[1]*y + b; });
+
+        matplot::figure();
+        matplot::scatter3(x0, x1, y);
+        matplot::hold(matplot::on);
+        matplot::plot3(x_line, y_line, z_line);
+        matplot::show();
+    }
 }
 
-vector<double> Model::Predict(const Data& d) {
+vector<double> Model::Predict(const Data& d, bool plot) {
     vector<double> predictions;
     vector<vector<double>> test = d.getTestingX();
     for (size_t i = 0; i < test.size(); i++) 

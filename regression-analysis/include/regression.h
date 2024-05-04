@@ -6,7 +6,23 @@
 #ifndef REGRESSION_H
 #define REGRESSION_H
 
-class Model {
+class ITrainable {
+    public:
+        virtual void Train(int epochs, bool display_batch, int batch_size) = 0;
+    };
+
+class IEvaluable {
+    public:
+        virtual double MeanSquaredError(void) = 0;
+        virtual double MeanSquaredError(const Data& d) const = 0;
+    };
+
+class IDisplayable {
+    public:
+        virtual void DisplayPlot(void) = 0;
+    };
+
+class Model: public ITrainable, public IEvaluable, public IDisplayable {
     private:
         double b;
         double error;
@@ -27,13 +43,13 @@ class Model {
 
     public:
         Model(Data data, double learning_rate = 0.0001);
-        double MeanSquaredError(void);
-        double MeanSquaredError(const Data&) const;
+        virtual double MeanSquaredError(void) override;
+        virtual double MeanSquaredError(const Data&) const override;
         void SetLearningRate(double rate);
         double GetLearningRate(void) const; 
-        void Train(int epochs, bool display_batch = false, int batch_size = 0);
+        virtual void Train(int epochs, bool display_batch = false, int batch_size = 0) override;
         void DisplayPlot(void);
-        std::vector<double> Predict(const Data&);
+        std::vector<double> Predict(const Data&, bool plot = false);
 };
 
 #endif

@@ -10,18 +10,19 @@ using namespace std;
 
 int main(void) {
 
-    Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Data.csv"};
+    Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Salary_Data.csv"};
     data.InitializeTrainingData(0.8);
     Model model{data};
-    model.SetLearningRate(0.01);
-    model.Train(100000, true, 500);
-    vector<double> predicted = model.Predict(data);
+    model.SetLearningRate(0.0001);
+    model.Train(10000, true, 500);
+    vector<double> predicted = model.Predict(data, true);
     cout << endl;
     for (int i = 0; i < data.getTestingY().size(); i++) 
         cout << "Predicted: " << predicted[i] << setw(10) << "Actual: " << data.getTestingY()[i] << endl;
     cout << "Error: " << model.MeanSquaredError(data);
-    cout << endl << model;
+    cout << endl;
     model.DisplayPlot();
+    cout << model;
 
     return 0;
 }
