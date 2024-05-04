@@ -21,6 +21,9 @@ CSVFile::CSVFile(string n) : File(n, "CSV"), separator(',') {}
 DataPoint::DataPoint(){}
 
 DataPoint::DataPoint(vector<double> X, double Y){
+    if(X.empty()){
+        throw invalid_argument("DataPoint cannot be created with empty X vector");
+    }
     x = X;
     y = Y;
 }
@@ -34,6 +37,9 @@ double DataPoint::getY() const{
 }
 
 double DataPoint::getX(int i) const{
+    if(i < 0 || i >= x.size()){
+        throw invalid_argument("Index out of range");
+    }
     return x[i];
 }
 
@@ -50,7 +56,7 @@ void DataPoint::Display() const{
 Data::Data(string Name) : CSVFile(Name) {
     file.open(fileName);
     if(!file.is_open()){
-        cout << "File not found" << endl;
+        throw invalid_argument("File not found");
         exit(1);
     }
     NumberOfRows = 0;
@@ -69,7 +75,7 @@ Data::Data(const Data& d)
     {
         file.open(fileName);
         if(!file.is_open()){
-            cout << "File not found" << endl;
+            throw invalid_argument("File not found");
             exit(1);
         }
 
@@ -78,7 +84,7 @@ Data::Data(const Data& d)
 
 int Data::MaxNumOfVariables(ifstream & file) {
     if(!file.is_open()){
-        cout << "File not found" << endl;
+        throw invalid_argument("File not found");
         exit(1);
     }
     string temp;
@@ -145,7 +151,7 @@ void Data::setDependentVariable() {
 
 void Data::InitializeDataPoints(ifstream & file) {
     if(!file.is_open()){
-        cout << "File not found" << endl;
+       throw invalid_argument("File not found");
         exit(1);
     }
     string temp;
