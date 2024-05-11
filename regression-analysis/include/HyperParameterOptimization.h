@@ -9,13 +9,14 @@
 
 class HyperParameteroptimization : public Optimization { 
 public:
-    HyperParameteroptimization(Model& model, Data& dataset)
-        : model_(model), dataset_(dataset) { 
+    HyperParameteroptimization( Data& dataset)
+        :  dataset_(dataset), model_{dataset} { 
+           
     };
     std::pair<double, double>  GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values);
     std::pair<double, double> RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range);
 private:
-    Model& model_;
+    Model model_;
     Data& dataset_; 
 };
 

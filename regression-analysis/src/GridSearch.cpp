@@ -26,7 +26,7 @@ std::pair<double, double>  HyperParameteroptimization::GridSearch(std::vector<do
             model_.SetLearningRate(LearningRate_Values[i]);
 
            
-            model_.Train(epochs_values[j],100,false); 
+            model_.Train(epochs_values[j],5,false); 
 
            
             predictions = model_.Predict(dataset_); 
