@@ -6,7 +6,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-#include<matplot/matplot.h>
+//#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -23,6 +23,10 @@ double RegressionEquation(const Model& model, size_t data_point) {
 }
 
 double RegressionEquation(const Model& model, const vector<double>& x) {
+    if (x.size() == 0) 
+        throw invalid_argument{"Empty dataset"};
+    if (model.m.size() == 0)
+        throw invalid_argument{"Empty weights"};
     double y = 0;
     for(size_t i = 0; i < x.size(); i++) 
         y += model.m[i] * x[i];
@@ -68,7 +72,9 @@ double Model::MeanSquaredError(size_t start_index, size_t batch_size) {
 // Check Error on Testing Dataset
 double Model::MeanSquaredError(const Data& d) const {
     double Error = 0;
-    vector<vector<double>> x = d.getTestingData().first;
+    vector<vector<double>> x;
+    vector<double> y;
+    tie(x, y) = d.getTestingData();
     for (int i = 0; i < y.size(); i++) 
         Error += pow(y[i] - RegressionEquation(*this, x[i]), 2);
     Error /= y.size();
@@ -112,7 +118,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-    vector<double> x0, x1;
+/*     vector<double> x0, x1;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -143,7 +149,7 @@ void Model::DisplayPlot(void) {
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    }
+    } */
 }
 
 vector<double> Model::Predict(const Data& d) const {

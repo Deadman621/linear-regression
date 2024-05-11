@@ -15,7 +15,7 @@ int main(void) {
 
         Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Salary_Data.csv"};
         data.InitializeTrainingData(0.8);
-        Model model{data};
+        Model model{data};       
         model.SetLearningRate(0.001);
         cout << endl;
         model.Train(100000, 5, false);
