@@ -6,7 +6,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-//#include<matplot/matplot.h>
+#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -65,10 +65,12 @@ double Model::MeanSquaredError(size_t start_index, size_t batch_size) {
     return this->error;
 }
 
+// Check Error on Testing Dataset
 double Model::MeanSquaredError(const Data& d) const {
     double Error = 0;
+    vector<vector<double>> x = d.getTestingData().first;
     for (int i = 0; i < y.size(); i++) 
-        Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
+        Error += pow(y[i] - RegressionEquation(*this, x[i]), 2);
     Error /= y.size();
 
     return Error;
@@ -110,7 +112,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-/*     vector<double> x0, x1;
+    vector<double> x0, x1;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -124,8 +126,8 @@ void Model::DisplayPlot(void) {
 
         matplot::figure();
         matplot::hold(matplot::on);
-        matplot::scatter(x0, y);
-        matplot::plot(x_line, y_line);
+        matplot::scatter(x0, y)->color("black").marker(".").fill(true).marker_size(10);
+        matplot::plot(x_line, y_line)->color("black").line_width(2.0);
         matplot::show();
         cin.get();
 
@@ -135,13 +137,13 @@ void Model::DisplayPlot(void) {
         vector<double> z_line = matplot::transform(x_line, y_line, [this](double x, double y) { return m[0]*x + m[1]*y + b; });
 
         matplot::figure();
-        matplot::scatter3(x0, x1, y);
+        matplot::scatter3(x0, x1, y)->color("green").marker_size(10);
         matplot::hold(matplot::on);
-        matplot::plot3(x_line, y_line, z_line);
+        matplot::plot3(x_line, y_line, z_line)->color("black").line_width(2.0);
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    } */
+    }
 }
 
 vector<double> Model::Predict(const Data& d) const {
