@@ -1,6 +1,7 @@
 #include<array>
 #include<vector>
 #include<cmath>
+#include<tuple>
 #include<Data.h>
 #include<ostream>
 #include<iostream>

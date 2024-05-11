@@ -28,6 +28,7 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
     friend double RegressionEquation(const Model& model, size_t data_point);
     friend double RegressionEquation(const Model& model, const std::vector<double>& x);
     friend std::ostream& operator<<(std::ostream& output, const Model& model);
+    friend class SaveModel;
 
     public:
         Model(Data data, double learning_rate = 0.0001);
@@ -47,6 +48,20 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         Model& operator=(const Model& model);
         std::vector<double> operator()(const std::vector<std::vector<double>>&) const;
         std::vector<double> operator()(const Data&) const;
+};
+
+class SaveModel: public iSaveable<Model> {
+    private:
+        std::string path;
+
+    public:
+        SaveModel(const std::string& path): path{path} {}
+        // Name of Folder in Current Workspace
+        void SetSaveDestination(const std::string& saveDestination) { this->path = saveDestination; }
+        void Save(const Model& model, const std::string& filename) override;
+        Model Load(const std::string& filename) override;
+        bool Exists(const std::string& filename) override;
+        void Delete(const std::string& filename) override;
 };
 
 #endif

@@ -15,28 +15,30 @@ int main(void) {
 
     try {
 
-        Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\3Dataset.csv"};
-        data.InitializeTrainingData(0.8);
-        Model model{data};
+        Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Student_Performance.csv"};
+        data.InitializeTrainingData(0.99);
+        //Model model{data};
           
-        HyperParameteroptimization optimizer{data};
+/*         HyperParameteroptimization optimizer{data};
         vector<double> LearningRate_range{0.0001, 0.001, 0.01, 0.1, 1};
         vector<double> epochs_range{100, 500, 1000, 5000, 10000};
         
         pair<double, double> best_hyperparameters = optimizer.RandomSearch(LearningRate_range, epochs_range);
         cout << endl << "Best Learning Rate: " << best_hyperparameters.first << endl;
         cout << "Best Epochs: " << best_hyperparameters.second << endl;
-        model.SetLearningRate(best_hyperparameters.first);
-        model.Train(best_hyperparameters.second, 2, false);   
+
+        model.SetLearningRate(0.0001);
+        model.Train(100, 2, false);   
         
-      /* vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1, 1};
+        vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1, 1};
         vector<double> epochs_values{100, 500, 1000, 5000, 10000};
         pair<double, double> best_hyperparameters = optimizer.GridSearch(LearningRate_Values, epochs_values);   
         model.SetLearningRate(best_hyperparameters.first);
-        model.Train(best_hyperparameters.second, 100, false);   */
+        model.Train(best_hyperparameters.second, 100, false); */  
 
-/*         Save<Model> save{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Trained Models\\"};
-        save.LoadModel(model, "Student_Performance"); */
+        SaveModel s{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Trained Models\\"};
+        //s.Save(model, "Student_Performance");
+        Model model = s.Load("Student_Performance");
         vector<double> predicted = model(data);
         cout << endl;
         model.DisplayPlot();
@@ -45,7 +47,11 @@ int main(void) {
         cout << "Error: " << model.MeanAbsolutePercentageError(data);
         cout << endl << model;
 
+    } catch (const std::ios_base::failure& e) {
+        cout << "File operation failed: " << e.what() << endl;
     } catch (const invalid_argument& e) {
+        cout << e.what() << endl;
+    } catch (const runtime_error& e) {
         cout << e.what() << endl;
     }
 

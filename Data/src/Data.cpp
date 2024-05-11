@@ -65,6 +65,23 @@ Data::Data(string Name) : CSVFile(Name) {
     file.close();
 }
 
+Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percentage) 
+    : CSVFile(Name), ColumnIndexForDependentVariable{ColumnIndexForDependentVariable} 
+    {
+        file.open(fileName);
+        if(!file.is_open()){
+            throw invalid_argument("File not found");
+            exit(1);
+        }
+        NumberOfRows = 0;
+        MaxVariablesQty = MaxNumOfVariables(file);
+        InitializeDataPoints(file);
+
+        file.close();
+
+        InitializeTrainingData(Percentage);
+    }
+
 Data::Data(const Data& d) 
     : CSVFile{d.fileName}, MaxVariablesQty{d.MaxVariablesQty}, 
       NameOfAllVariables{d.NameOfAllVariables}, 
@@ -197,6 +214,7 @@ void Data::InitializeTrainingData(double Percentage) {
         cin >> Percentage;
         return InitializeTrainingData(Percentage);
     }else{    
+        trainingPercentage = Percentage;
         Training.clear();
         Testing.clear();
         double NumOfLines = NumberOfRows * Percentage;

@@ -54,11 +54,13 @@ class Data : public CSVFile {
     int MaxVariablesQty;
     std::vector<std::string> NameOfAllVariables;
     int ColumnIndexForDependentVariable;
+    double trainingPercentage;
 
     std::vector<DataPoint> DP;
     std::vector<DataPoint> Training;
     std::vector<DataPoint> Testing;
     int NumberOfRows;
+    Data(std::string Name, int ColumnIndexForDependentVariable, double trainingPercentage = 0.99); 
     
     public:
     Data(std::string Name);
@@ -78,6 +80,7 @@ class Data : public CSVFile {
     Data& operator=(const Data& d);
 
     friend std::ostream& operator<<(std::ostream& os, const Data& d);
+    friend class SaveModel;
 };
 
 #endif

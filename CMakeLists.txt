@@ -6,6 +6,7 @@ set(SOURCE_FILES
     regression-analysis/src/regression.cpp
     regression-analysis/src/GridSearch.cpp
     regression-analysis/src/RandomSearch.cpp
+    regression-analysis/src/save.cpp
     Data/src/Data.cpp
     Data/src/Analysis.cpp
 )
