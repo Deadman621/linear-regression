@@ -6,7 +6,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-//#include<matplot/matplot.h>
+#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -18,7 +18,7 @@ void checkNaN(double value, const string& errorMessage) {
 double RegressionEquation(const Model& model, size_t data_point) {
     double y = 0;
     for(size_t i = 0; i < model.numFeatures; i++) 
-        y += model.m[i] * model.x[data_point][i];
+        y += model.m[i] * model.x.at(data_point)[i];
     return y + model.b;
 }
 
@@ -76,10 +76,24 @@ double Model::MeanSquaredError(const Data& d) const {
     vector<double> y;
     tie(x, y) = d.getTestingData();
     for (int i = 0; i < y.size(); i++) 
-        Error += pow(y[i] - RegressionEquation(*this, x[i]), 2);
+        Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
     Error /= y.size();
 
     return Error;
+}
+
+double Model::MeanAbsolutePercentageError(const Data& d) const {
+    double Error = 0;
+    vector<vector<double>> x;
+    vector<double> y;
+    tie(x, y) = d.getTestingData();
+    for (int i = 0; i < y.size(); i++) {
+        double prediction = RegressionEquation(*this, x[i]);
+        Error += abs((y[i] - prediction) / y[i]);
+    }
+    Error /= y.size();
+
+    return Error * 100;  // Return as percentage
 }
 
 void Model::GradientDescent(size_t start_index, size_t batch_size) {
@@ -118,7 +132,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-/*     vector<double> x0, x1;
+    vector<double> x0, x1;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -149,7 +163,7 @@ void Model::DisplayPlot(void) {
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    } */
+    }
 }
 
 vector<double> Model::Predict(const Data& d) const {

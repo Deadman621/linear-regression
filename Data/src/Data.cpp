@@ -1,4 +1,5 @@
 #include <Data.h>
+#include <limits>
 
 using namespace std;
 
@@ -143,7 +144,7 @@ void Data::setDependentVariable() {
         cin >> i;
         if (cin.fail()) {
             cin.clear(); 
-            cin.ignore(std::numeric_limits<std::streamsize>::max(), '\n'); 
+            cin.ignore(numeric_limits<streamsize>::max(), '\n'); 
             i = 0;
         }
     } while(i < 1 || i > MaxVariablesQty);

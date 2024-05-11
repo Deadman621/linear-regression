@@ -22,6 +22,7 @@ class ITrainable {
 
 class IEvaluable {
     public:
+        virtual double MeanAbsolutePercentageError(const Data& d) const = 0;
         virtual double MeanSquaredError(size_t start_index, size_t batch_size) = 0;
         virtual double MeanSquaredError(const Data& d) const = 0;
     };

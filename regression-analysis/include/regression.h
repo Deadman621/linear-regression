@@ -19,6 +19,7 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         std::vector<double> m;
         std::vector<double> y;
         std::vector<std::vector<double>> x;
+        virtual double MeanSquaredError(size_t start_index, size_t batch_size) override;
 
     protected:
         double learning_rate;
@@ -32,8 +33,8 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         Model(Data data, double learning_rate = 0.0001);
         Model(const Model& model);
 
-        virtual double MeanSquaredError(size_t start_index, size_t batch_size) override;
         virtual double MeanSquaredError(const Data&) const override;
+        virtual double MeanAbsolutePercentageError(const Data& d) const override;
 
         void SetLearningRate(double rate);
         double GetLearningRate(void) const noexcept; 

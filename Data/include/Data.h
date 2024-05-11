@@ -6,8 +6,6 @@
 #include <fstream>
 #include <ostream>
 #include <array>
-#include <algorithm> // for sort (vector)
-#include <cmath> // for sqrt
 #include <iostream>
 
 class DataPoint;
