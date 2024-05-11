@@ -18,9 +18,22 @@ int main(void) {
         Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Salary_Data.csv"};
         data.InitializeTrainingData(0.8);
         Model model{data};
-/*         model.SetLearningRate(0.0001);
-        cout << endl;
-        model.Train(100000, 5, false);
+
+        HyperParameteroptimization optimizer{model, data};
+       /* vector<double> LearningRate_range{0.0001, 0.001, 0.01, 0.1, 1};
+        vector<double> epochs_range{100, 500, 1000, 5000, 10000};
+        pair<double, double> best_hyperparameters = optimizer.RandomSearch(LearningRate_range, epochs_range);
+        model.SetLearningRate(best_hyperparameters.first);
+        model.Train(best_hyperparameters.second, 100, false);   */
+        
+      /* vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1, 1};
+        vector<double> epochs_values{100, 500, 1000, 5000, 10000};
+        pair<double, double> best_hyperparameters = optimizer.GridSearch(LearningRate_Values, epochs_values);   
+        model.SetLearningRate(best_hyperparameters.first);
+        model.Train(best_hyperparameters.second, 100, false);   */
+
+
+        
 /*         Save<Model> save{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Trained Models\\"};
         save.LoadModel(model, "Student_Performance"); */
         vector<double> predicted = model(data);
