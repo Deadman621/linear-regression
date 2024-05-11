@@ -102,7 +102,7 @@ void Model::GradientDescent(size_t start_index, size_t batch_size) {
 }
 
 void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
-    if (!(batch_size <= numDataPoints) || (batch_size == 0))
+    if ((batch_size >= numDataPoints) || (batch_size == 0))
         throw invalid_argument{"Invalid batch size"};
 
     for (size_t epoch = 0; epoch < epochs; epoch++) {
@@ -118,7 +118,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-/*     vector<double> x0, x1;
+    vector<double> x0, x1;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -149,7 +149,7 @@ void Model::DisplayPlot(void) {
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    } */
+    }
 }
 
 vector<double> Model::Predict(const Data& d) const {

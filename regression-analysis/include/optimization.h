@@ -1,13 +1,15 @@
-#include<iostream>
+#include <iostream>
+#include <vector>
 
 #ifndef OPTIMIZATION_H
 #define OPTIMIZATION_H
 
-template<typename T>
+
 class Optimization {
     public:
-        virtual double optimizeLearningRate(T& model) = 0;  
-        virtual int optimizeEpochs(T& model) = 0;
+        virtual std::pair<double, double>  GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values) = 0;
+        virtual std::pair<double, double>  RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range) = 0;
+        virtual ~Optimization() = default;
 };
 
 #endif
