@@ -7,6 +7,7 @@
 #include<Data.h>
 #include<Analysis.h>
 #include<HyperParameterOptimization.h>
+#include<tuple>
 #include<stdexcept>
 
 using namespace std;
@@ -15,26 +16,24 @@ int main(void) {
 
     try {
 
-        Data data{"C:\\Users\\Muddassir\\OneDrive\\Desktop\\project\\linear-regression\\Datasets\\3Dataset.csv"};
+        Data data{"C:\\Users\\Muddassir\\OneDrive\\Desktop\\project\\linear-regression\\Datasets\\Student_Performance.csv"};
         data.InitializeTrainingData(0.8);
         Model model{data};
 
           
-        HyperParameteroptimization optimizer{ data};
-        vector<double> LearningRate_range{0.0001, 0.001, 0.01, 0.1, 1};
+        HyperParameteroptimization optimizer{data};
+        /* vector<double> LearningRate_range{0.000001, 0.00001, 0.0001, 0.001, 0.01,0.1};
         vector<double> epochs_range{100, 500, 1000, 5000, 10000};
-        
-        pair<double, double> best_hyperparameters = optimizer.RandomSearch(LearningRate_range, epochs_range);
-        cout<<"Best Learning Rate: "<<best_hyperparameters.first<<endl;
-        cout<<"Best Epochs: "<<best_hyperparameters.second<<endl;
-        model.SetLearningRate(best_hyperparameters.first);
-        model.Train(best_hyperparameters.second, 1, false);   
-        
-      /* vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1, 1};
+        tuple<double, double , int> best_hyperparameters = optimizer.RandomSearch(LearningRate_range, epochs_range, data.getTrainingDataPoints());
+        model.SetLearningRate(get<0>(best_hyperparameters));
+        model.Train(get<1>(best_hyperparameters) ,get<2>(best_hyperparameters), false);   */
+     
+     
+        vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1, 1};
         vector<double> epochs_values{100, 500, 1000, 5000, 10000};
-        pair<double, double> best_hyperparameters = optimizer.GridSearch(LearningRate_Values, epochs_values);   
-        model.SetLearningRate(best_hyperparameters.first);
-        model.Train(best_hyperparameters.second, 100, false);   */
+        tuple<double, double , int> best_hyperparameters = optimizer.GridSearch(LearningRate_Values, epochs_values, data.getTrainingDataPoints());   
+        model.SetLearningRate(get<0>(best_hyperparameters));
+        model.Train(get<1>(best_hyperparameters) ,get<2>(best_hyperparameters), false);  
 
 
         
