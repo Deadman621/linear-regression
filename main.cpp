@@ -15,16 +15,16 @@ int main(void) {
 
     try {
 
-        Data data{"C:\\Users\\tech\\Desktop\\OPP_Project\\linear-regression\\Datasets\\Data.csv"};
-        data.InitializeTrainingData(0.7);
-        cout << data;
-        Model model{data,0.0001,true,false};
+        Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Salary_Data.csv"};
+        data.InitializeTrainingData(0.8);
+<<<<<<<<< Temporary merge branch 1
+        Model model{data, 0.0001,true,false}; // true for Normalization and false for Standardization
         
-        Data EvalData = data.GetEvalData();
-        EvalData.InitializeTrainingData(0.5);
-        cout << EvalData;
-
-        HyperParameteroptimization optimizer{data,true,false};
+=========
+        Model model{data};
+>>>>>>>>> Temporary merge branch 2
+          
+        HyperParameteroptimization optimizer{data};
         /* vector<double> LearningRate_range{0.000001, 0.00001, 0.0001, 0.001, 0.01,0.1};
         vector<double> epochs_range{100, 500, 1000, 5000, 10000};
         tuple<double, double , int> best_hyperparameters = optimizer.RandomSearch(LearningRate_range, epochs_range, data.getTrainingDataPoints());
