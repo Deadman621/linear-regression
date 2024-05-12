@@ -69,43 +69,38 @@ Data::Data(string Name) : CSVFile(Name) {
 Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percentage) 
     : CSVFile(Name), ColumnIndexForDependentVariable{ColumnIndexForDependentVariable} 
     {
-        file.open(fileName);
-        if(!file.is_open()){
-            throw invalid_argument("File not found");
-        }
-        NumberOfRows = 0;
-        MinX = numeric_limits<double>::max();
-        MaxX = numeric_limits<double>::min();
-        MinY = numeric_limits<double>::max();
-        MaxY = numeric_limits<double>::min();
+    file.open(fileName);
+    if(!file.is_open()){
+        throw invalid_argument("File not found");
+    }
+    NumberOfRows = 0;
+
 
         EVALPERCENTAGE = 0.3;
         MaxVariablesQty = MaxNumOfVariables(file);
         InitializeDataPoints(file);
 
-        file.close();
 
-        InitializeTrainingData(Percentage);
-    }
+    file.close();
+
+    InitializeTrainingData(Percentage);
+}
 
 Data::Data(const Data& d) 
     : CSVFile{d.fileName}, MaxVariablesQty{d.MaxVariablesQty}, 
       NameOfAllVariables{d.NameOfAllVariables}, 
       ColumnIndexForDependentVariable{d.ColumnIndexForDependentVariable}, 
-      DP{d.DP}, Training{d.Training}, Testing{d.Testing}, NumberOfRows{d.NumberOfRows} 
-    {
-        file.open(fileName);
-        if(!file.is_open()){
-            throw invalid_argument("File not found");
-        }
-        EVALPERCENTAGE = 0.3;
-        MinX = numeric_limits<double>::max();
-        MaxX = numeric_limits<double>::min();
-        MinY = numeric_limits<double>::max();
-        MaxY = numeric_limits<double>::min();
-
-        file.seekg(const_cast<ifstream&>(d.file).tellg());
+      DP{d.DP}, Training{d.Training}, Testing{d.Testing}, NumberOfRows{d.NumberOfRows},
+      MinX{d.MinX}, MaxX{d.MaxX}, MeanX{d.MeanX}, StdX{d.StdX}, 
+      MinY{d.MinY}, MaxY{d.MaxY}, MeanY{d.MeanY}, StdY{d.StdY} 
+{
+    file.open(fileName);
+    if(!file.is_open()){
+        throw invalid_argument("File not found");
     }
+
+    file.seekg(const_cast<ifstream&>(d.file).tellg());
+}
 
 int Data::MaxNumOfVariables(ifstream & file) {
     if(!file.is_open()){
@@ -197,11 +192,21 @@ void Data::InitializeDataPoints(ifstream & file) {
                     digits += temp[i];
                 }else{
                     if (temp[i] == separator || i == temp.size()){
-                        if (ColumnIndex == ColumnIndexForDependentVariable){
-                            tempY = stod(digits);
-                        }else{
-                            tempX.push_back(stod(digits));
+                        double value = stod(digits);
+                    if (ColumnIndex == ColumnIndexForDependentVariable){
+                        tempY = value;
+                        MinY = min(MinY, value);
+                        MaxY = max(MaxY, value);
+                    }else{
+                        tempX.push_back(value);
+                        if (ColumnIndex >= MinX.size()) {
+                            MinX.push_back(value);
+                            MaxX.push_back(value);
+                        } else {
+                            MinX[ColumnIndex] = min(MinX[ColumnIndex], value);
+                            MaxX[ColumnIndex] = max(MaxX[ColumnIndex], value);
                         }
+                    }
                         digits = "";
                         ColumnIndex++;
                     }
@@ -211,19 +216,14 @@ void Data::InitializeDataPoints(ifstream & file) {
             NumberOfRows++;
         }
     }
+
     NumberOfRows + 1;
-    pair<double, double> Mean = AnalysisTools::Mean(DP);
+    pair<vector<double>, double> Mean = AnalysisTools::Mean(DP);
     MeanX = Mean.first;
     MeanY = Mean.second;
-    pair<double, double> Std = AnalysisTools::StandardDeviation(DP);
+    pair<vector<double>, double> Std = AnalysisTools::StandardDeviation(DP);
     StdX = Std.first;
     StdY = Std.second;
-    pair<double, double> min = AnalysisTools::Min(DP);
-    MinX = min.first;
-    MinY = min.second;
-    pair<double, double> max = AnalysisTools::Max(DP);
-    MaxX = max.first;
-    MaxY = max.second;
 }
 
 Data Data::GetEvalData(){
@@ -354,17 +354,18 @@ DataPoint Data::NormalizeDataPoint(const DataPoint d) const {
     vector<double> tempX = d.getX();
     double tempY = d.getY();
     for (int i = 0; i < tempX.size(); i++) {
-        tempX[i] = (tempX[i] - MinX) / (MaxX - MinX);
+        tempX[i] = (tempX[i] - MinX[i]) / (MaxX[i] - MinX[i]);
     }
     tempY = (tempY - MinY) / (MaxY - MinY);
     DataPoint temp = DataPoint(tempX, tempY);
     return temp;
 }
-DataPoint Data::StandardizeDataPoint(const DataPoint d) const { //useful when there are alot of outliers 
+
+DataPoint Data::StandardizeDataPoint(const DataPoint d) const {
     vector<double> tempX = d.getX();
     double tempY = d.getY();
     for (int i = 0; i < tempX.size(); i++) {
-        tempX[i] = (tempX[i] - MeanX) / StdX;
+        tempX[i] = (tempX[i] - MeanX[i]) / StdX[i];
     }
 
     tempY = (tempY - MeanY) / StdY;

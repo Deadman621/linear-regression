@@ -7,7 +7,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-//#include<matplot/matplot.h>
+#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -133,38 +133,45 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-/*     vector<double> x0, x1;
+    vector<double> x0, x1, dx0, dx1, dy;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
-        if (numFeatures == 2) 
+        dx0.push_back(data.DeNormalizeX(data_point[0], 0));
+        if (numFeatures == 2) {
             x1.push_back(data_point[1]);
+            dx1.push_back(data.DeNormalizeX(data_point[1], 1));
+        }
     }
 
+    dy = data.DeNormalizeY(y);
+
     if (numFeatures == 1) {
-        vector<double> x_line = matplot::linspace(matplot::min(x0), matplot::max(x0), numDataPoints);
-        vector<double> y_line = matplot::transform(x_line, [this](auto x_line) { return m[0] * x_line + b; });
+        vector<double> x_line = matplot::linspace(matplot::min(dx0), matplot::max(dx0), numDataPoints);
+        vector<double> y_line = matplot::transform(x_line, [this](auto x_line) { return m[0] * data.NormalizeX(x_line, 0) + b; });
+        y_line = data.DeNormalizeY(y_line);
 
         matplot::figure();
         matplot::hold(matplot::on);
-        matplot::scatter(x0, y)->color("black").marker(".").fill(true).marker_size(10);
+        matplot::scatter(dx0, dy)->color("black").marker(".").fill(true).marker_size(10);
         matplot::plot(x_line, y_line)->color("black").line_width(2.0);
         matplot::show();
         cin.get();
 
     } else if (numFeatures == 2) {
-        vector<double> x_line = matplot::linspace(matplot::min(x0), matplot::max(x0), numDataPoints);
-        vector<double> y_line = matplot::linspace(matplot::min(x1), matplot::max(x1), numDataPoints);
-        vector<double> z_line = matplot::transform(x_line, y_line, [this](double x, double y) { return m[0]*x + m[1]*y + b; });
+        vector<double> x_line = matplot::linspace(matplot::min(dx0), matplot::max(dx0), numDataPoints);
+        vector<double> y_line = matplot::linspace(matplot::min(dx1), matplot::max(dx1), numDataPoints);
+        vector<double> z_line = matplot::transform(x_line, y_line, [this](double x, double y) { return m[0] * data.NormalizeX(x, 0) + m[1] * data.NormalizeX(y, 1) + b; });
+        z_line = data.DeNormalizeY(z_line);
 
         matplot::figure();
-        matplot::scatter3(x0, x1, y)->color("green").marker_size(10);
+        matplot::scatter3(dx0, dx1, dy)->color("green").marker_size(10);
         matplot::hold(matplot::on);
         matplot::plot3(x_line, y_line, z_line)->color("black").line_width(2.0);
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    } */
+    }
 }
 
 vector<double> Model::Predict(const Data& d, bool N, bool S) const {
@@ -173,11 +180,11 @@ vector<double> Model::Predict(const Data& d, bool N, bool S) const {
     for (size_t i = 0; i < test.size(); i++) 
         predictions.push_back(RegressionEquation(*this, test[i]));
 
-    return predictions;
+    return this->data.DeNormalizeY(predictions);
 }
 
 ostream& operator<<(ostream& output, const Model& model) {
-    output << endl << "Weights: " << endl;
+    output << endl << "Weights (Normalized): " << endl;
     for(size_t i = 0; i < model.m.size(); i++) 
         output << "m" << i << ": " << model.m[i] << endl;
     output << "Bias: " << model.b << endl;
@@ -221,7 +228,7 @@ vector<double> Model::operator()(const vector<vector<double>>& x) const {
     for (size_t i = 0; i < x.size(); i++) 
         predictions.push_back(RegressionEquation(*this, x[i]));
 
-    return predictions;
+    return this->data.DeNormalizeY(predictions);
 }
 
 vector<double> Model::operator()(const Data& d) const {

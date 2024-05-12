@@ -7,6 +7,8 @@
 #include <ostream>
 #include <array>
 #include <iostream>
+#include <stdexcept>
+#include <type_traits>
 
 class DataPoint;
 class Data;
@@ -61,13 +63,13 @@ class Data : public CSVFile {
     std::vector<DataPoint> Training;
     std::vector<DataPoint> Testing;
     
-    double MinX;
-    double MaxX;
+    std::vector<double> MinX; 
+    std::vector<double> MaxX; 
+    std::vector<double> MeanX; 
+    std::vector<double> StdX; 
     double MinY;
     double MaxY;
-    double MeanX;
     double MeanY;
-    double StdX;
     double StdY;
 
     int NumberOfRows;
@@ -98,6 +100,81 @@ class Data : public CSVFile {
 
     friend std::ostream& operator<<(std::ostream& os, const Data& d);
     friend class SaveModel;
+
+    template<typename T>
+    T NormalizeX(const T& x, int index = 0) const {
+        if constexpr (std::is_same_v<T, double>) 
+            return (x - MinX[index]) / (MaxX[index] - MinX[index]);
+        else if constexpr (std::is_same_v<T, std::vector<double>>) {
+            std::vector<double> temp = x;
+            for (int i = 0; i < temp.size(); i++) 
+                temp[i] = (temp[i] - MinX[i]) / (MaxX[i] - MinX[i]);
+
+            return temp;
+
+        } else if constexpr (std::is_same_v<T, std::vector<std::vector<double>>>) {
+            std::vector<std::vector<double>> temp = x;
+            for (std::vector<double>& vec : temp) 
+                vec = NormalizeX(vec);
+
+            return temp;
+        }
+
+        throw std::invalid_argument{"Invalid type"};
+    }
+
+    template<typename T>
+    T DeNormalizeX(const T& x, int index = 0) const {
+        if constexpr (std::is_same_v<T, double>) 
+            return x * (MaxX[index] - MinX[index]) + MinX[index];
+        else if constexpr (std::is_same_v<T, std::vector<double>>) {
+            std::vector<double> temp = x;
+            for (int i = 0; i < temp.size(); i++) 
+                temp[i] = temp[i] * (MaxX[i] - MinX[i]) + MinX[i];
+
+            return temp;
+
+        } else if constexpr (std::is_same_v<T, std::vector<std::vector<double>>>) {
+            std::vector<std::vector<double>> temp = x;
+            for (std::vector<double>& vec : temp) 
+                vec = DeNormalizeX(vec);
+
+            return temp;
+        }
+
+        throw std::invalid_argument{"Invalid type"};
+    }
+
+    template<typename T>
+    T NormalizeY(const T& y) const {
+        if constexpr (std::is_same_v<T, double>) 
+            return (y - MinY) / (MaxY - MinY);
+        else if constexpr (std::is_same_v<T, std::vector<double>>) {
+            std::vector<double> temp = y;
+            for (double& val : temp) 
+                val = NormalizeY(val);
+
+            return temp;
+
+        } 
+        throw std::invalid_argument{"Invalid type"};
+    }
+
+    template<typename T>
+    T DeNormalizeY(const T& y) const {
+        if constexpr (std::is_same_v<T, double>) 
+            return y * (MaxY - MinY) + MinY;
+        else if constexpr (std::is_same_v<T, std::vector<double>>) {
+            std::vector<double> temp = y;
+            for (double& val : temp) 
+                val = DeNormalizeY(val);
+
+            return temp;
+        }
+
+        throw std::invalid_argument{"Invalid type"};
+    }
+
 };
 
 #endif
