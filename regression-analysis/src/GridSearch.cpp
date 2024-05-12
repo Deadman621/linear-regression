@@ -13,14 +13,14 @@
     
 
 
-std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP, bool N, bool S){
+double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP, bool N, bool S){
     
     std::vector<int> batchSize_value = {32, 64, 128, 256, 512};
-    double best_learningrate = LearningRate_Values[0];
-    double best_epochs = epochs_values[0];
-    int bestBatchSize = 1;
-    
-    double error = model_.MeanSquaredError(dataset_);
+    best_learningrate = LearningRate_Values[0];
+    best_epochs = epochs_values[0];
+    bestBatchSize = DP.size() / 2;
+
+    //this->best_error = model_->MeanSquaredError(dataset_);
     std::vector<double> predictions;
     
     for (int i=0;i<LearningRate_Values.size();i++) {
@@ -36,21 +36,21 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
                 }else if(LearningRate_Values[i] < 0){
                     throw std::invalid_argument("Learning rate should be greater than 0");
                 }else{
-                    model_.SetLearningRate(LearningRate_Values[i]);
+                    model_->SetLearningRate(LearningRate_Values[i]);
                 }
                 
                 if(epochs_values[j] < 0){
                     throw std::invalid_argument("Epochs should be greater than 0");
                 }else{
-                    model_.Train(epochs_values[j],(batchSize_value[k] % (DP.size()/2)+1),false); 
+                    model_->Train(epochs_values[j],(batchSize_value[k] % (DP.size()/2)+1),false); 
                 }
 
             
-                predictions = model_.Predict(dataset_);
-                double next_error = model_.MeanSquaredError(dataset_);
+                predictions = model_->Predict(dataset_);
+                double next_error = model_->MeanSquaredError(dataset_);
 
-                if(next_error < error){
-                    error = next_error;
+                if(next_error < best_error){
+                    best_error = next_error;
                     best_learningrate = LearningRate_Values[i];
                     best_epochs = epochs_values[j];
                     bestBatchSize = batchSize_value[k];
@@ -61,5 +61,7 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
         }
     }
 
-    return {best_learningrate, best_epochs, (bestBatchSize%DP.size())+1};
+    bestBatchSize = (bestBatchSize%DP.size())+1;
+
+    return best_error;
 }

@@ -58,7 +58,7 @@ Data::Data(string Name) : CSVFile(Name) {
         throw invalid_argument("File not found");
     }
     NumberOfRows = 0;
-    EVALPERCENTAGE = 0.3;
+    EVALPERCENTAGE = 0.1;
     MaxVariablesQty = MaxNumOfVariables(file);
     setDependentVariable();
     InitializeDataPoints(file);
@@ -76,7 +76,7 @@ Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percent
     NumberOfRows = 0;
 
 
-        EVALPERCENTAGE = 0.3;
+        EVALPERCENTAGE = 0.1;
         MaxVariablesQty = MaxNumOfVariables(file);
         InitializeDataPoints(file);
 
@@ -229,6 +229,7 @@ void Data::InitializeDataPoints(ifstream & file) {
 Data Data::GetEvalData(){
 
     Data temp = Data(*this);
+
     vector<DataPoint> tempDP;
     for (int i = 0 ; i < NumberOfRows * EVALPERCENTAGE ; i++){
         tempDP.push_back(DP[i]);
@@ -261,16 +262,18 @@ void Data::InitializeTrainingData(double Percentage) {
             }
         }
     }
+
 }
 
 size_t Data::getNumDataPoints() const {
-    return NumberOfRows;
+    return NumberOfRows; 
 }
 
 vector<DataPoint> Data::getTrainingDataPoints(bool WantNormalized, bool WantStandardized) const {
     if (WantNormalized && WantStandardized) {
         throw invalid_argument("Cannot Normalize and Standardize at the same time");
     }
+
     if (WantNormalized) {
         vector<DataPoint> temp;
         for (int i = 0; i < Training.size(); i++) {
@@ -284,9 +287,9 @@ vector<DataPoint> Data::getTrainingDataPoints(bool WantNormalized, bool WantStan
         }
         return temp;
     }
-    // for(int i = 0 ; i < Training.size() ; i++){
-    //     Training[i].Display();
-    // }
+    for(int i = 0 ; i < Training.size() ; i++){
+        Training[i].Display();
+    }
     return Training;
 }
 
@@ -400,6 +403,7 @@ pair<vector<vector<double>>, vector<double>> Data::getTrainingData(bool WantNorm
     if (WantNormalized && WantStandardized) {
         throw invalid_argument("Cannot Normalize and Standardize at the same time");
     }
+
     vector<vector<double>> X;
     vector<double> Y;
     for (int i = 0; i < Training.size(); i++) {
@@ -416,6 +420,7 @@ pair<vector<vector<double>>, vector<double>> Data::getTrainingData(bool WantNorm
             Y.push_back(Training[i].getY());
         }
     }
+
     return make_pair(X, Y);
 }
 

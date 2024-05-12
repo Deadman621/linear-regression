@@ -1,12 +1,9 @@
-#include<array>
-#include<vector>
 #include<cmath>
 #include<tuple>
-#include<Data.h>
-#include<ostream>
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
+#include<HyperParameterOptimization.h>
 //#include<matplot/matplot.h>
 
 using namespace std;
@@ -36,8 +33,8 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
 
 Model::Model(Data d) 
     : data{d}, b{0}, error{0}, 
-      learning_rate{learning_rate},
-      numBatches{0} 
+        learning_rate{learning_rate},
+        numBatches{0}
 {
     tie(this->x, this->y) = data.getTrainingData(true, false);
 
@@ -53,6 +50,24 @@ Model::Model(Data d)
 
     m = vector<double>(numFeatures, 0.0);
 
+    Data evalData = d.GetEvalData();
+    evalData.InitializeTrainingData(0.8);
+    optimizer = new HyperParameteroptimization{evalData};
+    optimizer->setModel(this);
+}
+
+void Model::Optimize(void) {
+    vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1};
+    vector<double> epochs_values;
+
+    for(size_t i = 0; i < 5; i++) {
+        int epochs = numDataPoints / (100 * (i + 1));
+        epochs = std::max(epochs, 1); 
+        epochs_values.push_back(epochs);
+    }
+
+    double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+    double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
 }
 
 void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
@@ -116,7 +131,21 @@ void Model::GradientDescent(size_t start_index, size_t batch_size) {
     b -= b_gradient * learning_rate;
 }
 
-void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
+void Model::Train(bool display_batch, size_t epochs, size_t batch_size) {
+    
+    Optimize();
+
+    if (epochs != 0)
+        epochs = optimizer->best_epochs;
+    
+    if (batch_size != 0)
+        batch_size = optimizer->bestBatchSize;
+        
+    this->learning_rate = optimizer->best_learningrate;
+
+    if (epochs == 0) 
+        throw invalid_argument{"Invalid number of epochs"};
+
     if ((batch_size >= numDataPoints) || (batch_size == 0))
         throw invalid_argument{"Invalid batch size"};
 
@@ -191,6 +220,12 @@ ostream& operator<<(ostream& output, const Model& model) {
 
     return output;
 }
+
+Model::Model(const Model& model) 
+    : data{model.data}, b{model.b}, error{model.error}, 
+      numFeatures{model.numFeatures}, numDataPoints{model.numDataPoints}, 
+      numBatches{model.numBatches}, m{model.m}, x{model.x}, y{model.y}, 
+      learning_rate{model.learning_rate} {}
 
 bool Model::operator==(const Model& model) const {
     return { 

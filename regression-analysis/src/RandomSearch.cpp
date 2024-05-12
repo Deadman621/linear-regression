@@ -3,12 +3,12 @@
 
 
     // Implement the logic to randomly sample hyperparameters from the ranges
-    // For each sample, train your model and evaluate it
+    // For each sample, train your model_ and evaluate it
     // Keep track of the best set of hyperparameters
     // Return the best learning rate
       // Return the best number of epochs
 
-  std::tuple<double, double, int> HyperParameteroptimization::RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range, std::vector<DataPoint> DP, bool N, bool S){
+  double HyperParameteroptimization::RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range, std::vector<DataPoint> DP, bool N, bool S){
      
 
       std::random_device rd;
@@ -19,18 +19,17 @@
       std::uniform_int_distribution<> lr(0, LearningRate_range.size() - 1);
       std::uniform_int_distribution<> ep(0, epochs_range.size() - 1);
 
-      double best_learningrate = LearningRate_range[lr(gen)];
+      best_learningrate = LearningRate_range[lr(gen)];
 
-      double best_epochs = epochs_range[ep(gen)];
+      best_epochs = epochs_range[ep(gen)];
 
-      int bestBatchSize = 1;
+      bestBatchSize = DP.size() / 2;
 
-      model_.SetLearningRate(best_learningrate);
-      double best_error = model_.MeanSquaredError(dataset_);
-      model_.Train(best_epochs,1, false);
-
+      model_->SetLearningRate(best_learningrate);
+      //this->best_error = model_->MeanSquaredError(dataset_);
+      model_->Train(best_epochs,1, false);
   
-    for (int i = 0; i < 32; ++i) { 
+    for (int i = 0; i < 16; ++i) { 
         
         double learningrate = LearningRate_range[lr(gen)];
         
@@ -43,25 +42,25 @@
         }else if(learningrate < 0){
             throw std::invalid_argument("Learning rate should be greater than 0");
         }else{
-            model_.SetLearningRate(learningrate);
+            model_->SetLearningRate(learningrate);
         }
 
         if(epochs < 0){
             throw std::invalid_argument("Epochs should be greater than 0");
         }else{  
-            model_.Train(epochs, batchSize , false);
+            model_->Train(epochs, batchSize , false);
         }
 
 
-        double error = model_.MeanSquaredError(dataset_);
+        double error = model_->MeanSquaredError(dataset_);
         
         if (error < best_error) {
+            best_error = error;
             best_learningrate = learningrate;
             best_epochs = epochs;
-            best_error = error;
             bestBatchSize = batchSize;
         }
     }
 
-    return {best_learningrate, best_epochs, bestBatchSize};
+    return best_error;
   };

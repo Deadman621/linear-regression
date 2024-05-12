@@ -1,6 +1,3 @@
-#include<vector>
-#include<array>
-#include<ostream>
 #include<Data.h>
 
 #ifndef REGRESSION_H
@@ -8,9 +5,12 @@
 
 #include<Interface.h>
 
+class HyperParameteroptimization;
+
 class Model: public ITrainable, public IEvaluable, public IDisplayable {
     private:
         Data data;
+        HyperParameteroptimization* optimizer;
         double b;
         double error;
         std::size_t numFeatures;
@@ -20,6 +20,7 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         std::vector<double> y;
         std::vector<std::vector<double>> x;
         virtual double MeanSquaredError(size_t start_index, size_t batch_size) override;
+        void Optimize(void);
 
     protected:
         double learning_rate;
@@ -41,7 +42,7 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         double GetLearningRate(void) const noexcept; 
 
         void DisplayPlot(void);
-        virtual void Train(size_t epochs, size_t batch_size = 50, bool display_batch = false) override;
+        virtual void Train(bool display_batch = false, size_t epochs = 0, size_t batch_size = 0) override;
         std::vector<double> Predict(const Data&) const;
 
         bool operator==(const Model& model) const;
