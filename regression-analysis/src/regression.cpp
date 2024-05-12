@@ -7,7 +7,7 @@
 #include<iostream>
 #include<stdexcept>
 #include<regression.h>
-#include<matplot/matplot.h>
+//#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -34,12 +34,12 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
     return y + model.b;
 }
 
-Model::Model(Data d, double learning_rate,bool N, bool S) 
+Model::Model(Data d) 
     : data{d}, b{0}, error{0}, 
       learning_rate{learning_rate},
       numBatches{0} 
 {
-    tie(this->x, this->y) = data.getTrainingData(N,S);
+    tie(this->x, this->y) = data.getTrainingData(true, false);
 
     if (y.empty()) 
         throw std::runtime_error("dataset is empty");
@@ -71,11 +71,11 @@ double Model::MeanSquaredError(size_t start_index, size_t batch_size) {
 }
 
 // Check Error on Testing Dataset
-double Model::MeanSquaredError(const Data& d,bool N, bool S) const {
+double Model::MeanSquaredError(const Data& d) const {
     double Error = 0;
     vector<vector<double>> x;
     vector<double> y;
-    tie(x, y) = d.getTestingData(N,S);
+    tie(x, y) = d.getTestingData(true, false);
     for (int i = 0; i < y.size(); i++) 
         Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
     Error /= y.size();
@@ -83,7 +83,7 @@ double Model::MeanSquaredError(const Data& d,bool N, bool S) const {
     return Error;
 }
 
-double Model::MeanAbsolutePercentageError(const Data& d,bool N, bool S) const {
+double Model::MeanAbsolutePercentageError(const Data& d) const {
     double Error = 0;
     vector<vector<double>> x;
     vector<double> y;
@@ -133,7 +133,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-    vector<double> x0, x1, dx0, dx1, dy;
+/*     vector<double> x0, x1, dx0, dx1, dy;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -171,10 +171,10 @@ void Model::DisplayPlot(void) {
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    }
+    } */
 }
 
-vector<double> Model::Predict(const Data& d, bool N, bool S) const {
+vector<double> Model::Predict(const Data& d) const {
     vector<double> predictions;
     vector<vector<double>> test = d.getTestingData(true, false).first;
     for (size_t i = 0; i < test.size(); i++) 

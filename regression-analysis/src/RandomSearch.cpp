@@ -1,4 +1,4 @@
-#include "hyperparameteroptimization.h"
+#include <HyperParameterOptimization.h>
 #include <random>
 
 
@@ -23,10 +23,10 @@
 
       double best_epochs = epochs_range[ep(gen)];
 
-      int bestBatchSize;
+      int bestBatchSize = 1;
 
       model_.SetLearningRate(best_learningrate);
-      double best_error = model_.MeanSquaredError(dataset_,N,S);
+      double best_error = model_.MeanSquaredError(dataset_);
       model_.Train(best_epochs,1, false);
 
   
@@ -53,7 +53,7 @@
         }
 
 
-        double error = model_.MeanSquaredError(dataset_,N,S);
+        double error = model_.MeanSquaredError(dataset_);
         
         if (error < best_error) {
             best_learningrate = learningrate;

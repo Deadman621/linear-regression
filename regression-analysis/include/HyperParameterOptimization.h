@@ -9,8 +9,8 @@
 
 class HyperParameteroptimization : public Optimization { 
 public:
-    HyperParameteroptimization( Data& dataset,bool N=false, bool S=false)
-        :  dataset_(dataset), model_{dataset,0.0001,N,S} { 
+    HyperParameteroptimization( Data& dataset)
+        :  dataset_(dataset), model_{dataset} { 
            
     };
     std::tuple<double, double, int> GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP, bool N=false, bool S=false) ;

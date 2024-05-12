@@ -7,7 +7,6 @@ set(SOURCE_FILES
     regression-analysis/src/GridSearch.cpp
     regression-analysis/src/RandomSearch.cpp
     regression-analysis/src/save.cpp
-    Data/src/Scaling.cpp
     Data/src/Analysis.cpp
     Data/src/Data.cpp
 )
@@ -27,9 +26,9 @@ enable_testing()
 
 add_executable(main ${SOURCE_FILES} ${HEADER_FILES})
  
-target_link_libraries(main PUBLIC matplot)
+#target_link_libraries(main PUBLIC matplot)
 
-add_subdirectory(matplotplusplus)
+#add_subdirectory(matplotplusplus)
 
 target_include_directories(main PUBLIC regression-analysis/include Data/include)
 

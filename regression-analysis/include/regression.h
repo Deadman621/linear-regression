@@ -31,18 +31,18 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
     friend class SaveModel;
 
     public:
-        Model(Data data, double learning_rate = 0.0001,bool N=false, bool S=false);
+        Model(Data data);
         Model(const Model& model);
 
-        virtual double MeanSquaredError(const Data& d, bool N = false, bool S = false) const override;
-        virtual double MeanAbsolutePercentageError(const Data& d,bool N=false, bool S=false) const override;
+        virtual double MeanSquaredError(const Data& d) const override;
+        virtual double MeanAbsolutePercentageError(const Data& d) const override;
 
         void SetLearningRate(double rate);
         double GetLearningRate(void) const noexcept; 
 
         void DisplayPlot(void);
         virtual void Train(size_t epochs, size_t batch_size = 50, bool display_batch = false) override;
-        std::vector<double> Predict(const Data&, bool N = false, bool S = false) const;
+        std::vector<double> Predict(const Data&) const;
 
         bool operator==(const Model& model) const;
         Model& operator=(const Model& model);

@@ -18,15 +18,18 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
     std::vector<int> batchSize_value = {32, 64, 128, 256, 512};
     double best_learningrate = LearningRate_Values[0];
     double best_epochs = epochs_values[0];
-    int bestBatchSize;
+    int bestBatchSize = 1;
     
-    
-    double error = model_.MeanSquaredError(dataset_,N,S);
+    double error = model_.MeanSquaredError(dataset_);
     std::vector<double> predictions;
     
     for (int i=0;i<LearningRate_Values.size();i++) {
         for (int j=0;j<epochs_values.size();j++) {
             for(int k=0;k<batchSize_value.size();k++){
+
+                if (batchSize_value[k] > DP.size()) {
+                    batchSize_value[k] = DP.size();
+                }
 
                 if(LearningRate_Values[i] > 1){
                     throw std::invalid_argument("Learning rate should be less than 1");
@@ -43,8 +46,8 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
                 }
 
             
-                predictions = model_.Predict(dataset_,N,S);
-                double next_error = model_.MeanSquaredError(dataset_,N,S);
+                predictions = model_.Predict(dataset_);
+                double next_error = model_.MeanSquaredError(dataset_);
 
                 if(next_error < error){
                     error = next_error;
