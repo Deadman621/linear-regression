@@ -1,17 +1,33 @@
-#include <Analysis.h>
+#include<Analysis.h>
 #include<stdexcept>
 
 using namespace std;
+
+vector<double> AnalysisTools::Mean(const vector<vector<double>>& data) {
+    if(data.empty() || data[0].empty()){
+        throw invalid_argument("Cannot calculate mean of empty data set");
+    }
+    vector<double> sum(data[0].size(), 0);
+    for (const auto& row : data) {
+        for (int i = 0; i < row.size(); i++) {
+            sum[i] += row[i];
+        }
+    }
+    for (double& s : sum) {
+        s /= data.size();
+    }
+    return sum;
+}
 
 double AnalysisTools::Mean(const vector<double>& data) {
     if(data.empty()){
         throw invalid_argument("Cannot calculate mean of empty data set");
     }
     double sum = 0;
-    for (double num : data) 
-        sum += num;
-    
-    return data.empty() ? 0 : sum / data.size();
+    for (const auto& value : data) {
+        sum += value;
+    }
+    return sum / data.size();
 }
 
 double AnalysisTools::Variance(const vector<double>& data) {
@@ -46,161 +62,171 @@ double AnalysisTools::Median(const vector<double>& data) {
     }
 }
 
-double AnalysisTools::Mean(const vector<vector<double>>& data) {
-    if(data.empty()){
-        throw invalid_argument("Cannot calculate mean of empty data set");
-    }
-    vector<double> means;
-    for (int i = 0; i < data.size(); i++) {
-        means.push_back(Mean(data[i]));
-    }
-    return Mean(means);
-}
 
-double AnalysisTools::Variance(const vector<vector<double>>& data) {
-    if(data.empty()){
+vector<double> AnalysisTools::Variance(const vector<vector<double>>& data) {
+    if(data.empty() || data[0].empty()){
         throw invalid_argument("Cannot calculate variance of empty data set");
     }
-    double OverAllMean = Mean(data);
-    double sum = 0;
-    for (int i = 0; i < data.size(); i++) {
-        for (int j = 0; j < data[i].size(); j++) {
-            sum += (data[i][j] - OverAllMean) * (data[i][j] - OverAllMean);
+    vector<double> means = Mean(data);
+    vector<double> variances(data[0].size(), 0);
+    for (const auto& row : data) {
+        for (int i = 0; i < row.size(); i++) {
+            variances[i] += (row[i] - means[i]) * (row[i] - means[i]);
         }
     }
-    return data.empty() ? 0 : (sum / (data.size() * data[0].size()));
+    for (double& variance : variances) {
+        variance /= data.size();
+    }
+    return variances;
 }
 
-double AnalysisTools::StandardDeviation(const vector<vector<double>>& data) {
-    if(data.empty()){
+vector<double> AnalysisTools::StandardDeviation(const vector<vector<double>>& data) {
+    if(data.empty() || data[0].empty()){
         throw invalid_argument("Cannot calculate standard deviation of empty data set");
     }
-    return sqrt(Variance(data));
+    vector<double> variances = Variance(data);
+    for (double& variance : variances) {
+        variance = sqrt(variance);
+    }
+    return variances;
 }
 
-double AnalysisTools::Median(const vector<vector<double>>& data) {
-    if(data.empty()){
+vector<double> AnalysisTools::Median(const vector<vector<double>>& data) {
+    if(data.empty() || data[0].empty()){
         throw invalid_argument("Cannot calculate median of empty data set");
     }
-    vector<double> medians;
-    for (int i = 0; i < data.size(); i++) {
-        medians.push_back(Median(data[i]));
+    vector<double> medians(data[0].size(), 0);
+    for (int i = 0; i < data[0].size(); i++) {
+        vector<double> columnData;
+        for (int j = 0; j < data.size(); j++) {
+            columnData.push_back(data[j][i]);
+        }
+        sort(columnData.begin(), columnData.end());
+        if (columnData.size() % 2 == 0) {
+            medians[i] = (columnData[columnData.size()/2 - 1] + columnData[columnData.size()/2]) / 2;
+        } else {
+            medians[i] = columnData[columnData.size()/2];
+        }
     }
-    return Median(medians);
+    return medians;
 }
 
-pair<double, double> AnalysisTools::Mean(const vector<DataPoint>& data) {
+pair<vector<double>, double> AnalysisTools::Mean(const vector<DataPoint>& data) {
     if(data.empty()){
         throw invalid_argument("Cannot calculate mean of empty data set");
     }
     vector<vector<double>> x;
     vector<double> y;
-    for (int i = 0; i < data.size(); i++) {
-        x.push_back(data[i].getX());
-        y.push_back(data[i].getY());
+    for (const auto& dp : data) {
+        x.push_back(dp.getX());
+        y.push_back(dp.getY());
     }
     return {AnalysisTools::Mean(x), AnalysisTools::Mean(y)};
 }
 
-pair<double, double> AnalysisTools::Variance(const std::vector<DataPoint>& data){
+pair<vector<double>, double> AnalysisTools::Variance(const vector<DataPoint>& data) {
     if(data.empty()){
         throw invalid_argument("Cannot calculate variance of empty data set");
     }
     vector<vector<double>> x;
     vector<double> y;
-    for (int i = 0; i < data.size(); i++) {
-        x.push_back(data[i].getX());
-        y.push_back(data[i].getY());
+    for (const auto& dp : data) {
+        x.push_back(dp.getX());
+        y.push_back(dp.getY());
     }
     return {AnalysisTools::Variance(x), AnalysisTools::Variance(y)};
 }
 
-pair<double, double> AnalysisTools::StandardDeviation(const std::vector<DataPoint>& data){
+pair<vector<double>, double> AnalysisTools::StandardDeviation(const vector<DataPoint>& data) {
     if(data.empty()){
         throw invalid_argument("Cannot calculate standard deviation of empty data set");
     }
     vector<vector<double>> x;
     vector<double> y;
-    for (int i = 0; i < data.size(); i++) {
-        x.push_back(data[i].getX());
-        y.push_back(data[i].getY());
+    for (const auto& dp : data) {
+        x.push_back(dp.getX());
+        y.push_back(dp.getY());
     }
     return {AnalysisTools::StandardDeviation(x), AnalysisTools::StandardDeviation(y)};
 }
 
-pair<double, double> AnalysisTools::Median(const std::vector<DataPoint>& data){
+pair<vector<double>, double> AnalysisTools::Median(const vector<DataPoint>& data) {
     if(data.empty()){
         throw invalid_argument("Cannot calculate median of empty data set");
     }
     vector<vector<double>> x;
     vector<double> y;
-    for (int i = 0; i < data.size(); i++) {
-        x.push_back(data[i].getX());
-        y.push_back(data[i].getY());
+    for (const auto& dp : data) {
+        x.push_back(dp.getX());
+        y.push_back(dp.getY());
     }
     return {AnalysisTools::Median(x), AnalysisTools::Median(y)};
 }
 
-pair<double, double> AnalysisTools::Range(const std::vector<DataPoint>& data){
-    if(data.empty()){
+pair<vector<double>, double> AnalysisTools::Range(const vector<DataPoint>& data) {
+    if(data.empty() || data[0].getX().empty()){
         throw invalid_argument("Cannot calculate range of empty data set");
     }
-    double MinX = data[0].getX(0);
-    double MaxX = data[0].getX(0);
+    vector<double> MinX(data[0].getX().size(), data[0].getX(0));
+    vector<double> MaxX(data[0].getX().size(), data[0].getX(0));
     double MinY = data[0].getY();
     double MaxY = data[0].getY();
-    for (int i = 0; i < data.size(); i++) {
-        for (int j = 0; j < data[i].getX().size(); j++) {
-            if (data[i].getX(j) < MinX) {
-                MinX = data[i].getX(j);
+    for (const auto& dp : data) {
+        for (int j = 0; j < dp.getX().size(); j++) {
+            if (dp.getX(j) < MinX[j]) {
+                MinX[j] = dp.getX(j);
             }
-            if (data[i].getX(j) > MaxX) {
-                MaxX = data[i].getX(j);
+            if (dp.getX(j) > MaxX[j]) {
+                MaxX[j] = dp.getX(j);
             }
         }
-        if (data[i].getY() < MinY) {
-            MinY = data[i].getY();
+        if (dp.getY() < MinY) {
+            MinY = dp.getY();
         }
-        if (data[i].getY() > MaxY) {
-            MaxY = data[i].getY();
+        if (dp.getY() > MaxY) {
+            MaxY = dp.getY();
         }
     }
-    return {MaxX - MinX, MaxY - MinY};
+    vector<double> rangeX;
+    for (int i = 0; i < MinX.size(); i++) {
+        rangeX.push_back(MaxX[i] - MinX[i]);
+    }
+    return {rangeX, MaxY - MinY};
 }
 
-pair<double, double> AnalysisTools::Min(const std::vector<DataPoint>& data){
-    if(data.empty()){
+pair<vector<double>, double> AnalysisTools::Min(const vector<DataPoint>& data) {
+    if(data.empty() || data[0].getX().empty()){
         throw invalid_argument("Cannot calculate min of empty data set");
     }
-    double MinX = data[0].getX(0);
+    vector<double> MinX(data[0].getX().size(), data[0].getX(0));
     double MinY = data[0].getY();
-    for (int i = 0; i < data.size(); i++) {
-        for (int j = 0; j < data[i].getX().size(); j++) {
-            if (data[i].getX(j) < MinX) {
-                MinX = data[i].getX(j);
+    for (const auto& dp : data) {
+        for (int j = 0; j < dp.getX().size(); j++) {
+            if (dp.getX(j) < MinX[j]) {
+                MinX[j] = dp.getX(j);
             }
         }
-        if (data[i].getY() < MinY) {
-            MinY = data[i].getY();
+        if (dp.getY() < MinY) {
+            MinY = dp.getY();
         }
     }
     return {MinX, MinY};
 }
 
-pair<double, double> AnalysisTools::Max(const std::vector<DataPoint>& data){
-    if(data.empty()){
+pair<vector<double>, double> AnalysisTools::Max(const vector<DataPoint>& data) {
+    if(data.empty() || data[0].getX().empty()){
         throw invalid_argument("Cannot calculate max of empty data set");
     }
-    double MaxX = data[0].getX(0);
+    vector<double> MaxX(data[0].getX().size(), data[0].getX(0));
     double MaxY = data[0].getY();
-    for (int i = 0; i < data.size(); i++) {
-        for (int j = 0; j < data[i].getX().size(); j++) {
-            if (data[i].getX(j) > MaxX) {
-                MaxX = data[i].getX(j);
+    for (const auto& dp : data) {
+        for (int j = 0; j < dp.getX().size(); j++) {
+            if (dp.getX(j) > MaxX[j]) {
+                MaxX[j] = dp.getX(j);
             }
         }
-        if (data[i].getY() > MaxY) {
-            MaxY = data[i].getY();
+        if (dp.getY() > MaxY) {
+            MaxY = dp.getY();
         }
     }
     return {MaxX, MaxY};
