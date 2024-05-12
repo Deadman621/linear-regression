@@ -205,4 +205,3 @@ pair<double, double> AnalysisTools::Max(const std::vector<DataPoint>& data){
     }
     return {MaxX, MaxY};
 }
-

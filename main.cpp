@@ -35,11 +35,11 @@ int main(void) {
         //SaveModel s{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Trained Models\\"};
         //s.Save(model, "Student_Performance");
         //Model model = s.Load("Student_Performance");
-        vector<double> predicted = model(data);
+        vector<double> predicted = data.DeNormalizeY(model(data));
         cout << endl;
         model.DisplayPlot();
         for (int i = 0; i < data.getTestingData().second.size(); i++) 
-            cout << "Predicted: " << predicted[i] << setw(10) << "Actual: " << data.getTestingData(true,false).second[i] << endl;
+            cout << "Predicted: " << predicted[i] << setw(10) << "Actual: " << data.getTestingData().second[i] << endl;
         cout << "Error: " << model.MeanAbsolutePercentageError(data);
         cout << endl << model;
 /*         data.DispAllData();
