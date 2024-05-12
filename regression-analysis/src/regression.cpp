@@ -87,7 +87,7 @@ double Model::MeanAbsolutePercentageError(const Data& d,bool N, bool S) const {
     double Error = 0;
     vector<vector<double>> x;
     vector<double> y;
-    tie(x, y) = d.getTestingData(N,S);
+    tie(x, y) = d.getTestingData(true, false);
     for (int i = 0; i < y.size(); i++) {
         double prediction = RegressionEquation(*this, x[i]);
         Error += abs((y[i] - prediction) / y[i]);
@@ -169,7 +169,7 @@ void Model::DisplayPlot(void) {
 
 vector<double> Model::Predict(const Data& d, bool N, bool S) const {
     vector<double> predictions;
-    vector<vector<double>> test = d.getTestingData(N,S).first;
+    vector<vector<double>> test = d.getTestingData(true, false).first;
     for (size_t i = 0; i < test.size(); i++) 
         predictions.push_back(RegressionEquation(*this, test[i]));
 
