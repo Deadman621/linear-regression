@@ -2,7 +2,7 @@
 #include <limits>
 #include <Analysis.h>
 
-using namespace std;
+using namespace std; 
 
 File::File(string n, string t){
     fileName = n;
@@ -55,10 +55,10 @@ void DataPoint::Display() const{
 Data::Data(string Name) : CSVFile(Name) {
     file.open(fileName);
     if(!file.is_open()){
-        throw invalid_argument("File not found");
+        throw invalid_argument(fileName + ' ' + "not found");
     }
     NumberOfRows = 0;
-    EVALPERCENTAGE = 0.1;
+    this->EVALPERCENTAGE = 0.1;
     MaxVariablesQty = MaxNumOfVariables(file);
     setDependentVariable();
     InitializeDataPoints(file);
@@ -66,20 +66,17 @@ Data::Data(string Name) : CSVFile(Name) {
     file.close();
 }
 
-Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percentage) 
-    : CSVFile(Name), ColumnIndexForDependentVariable{ColumnIndexForDependentVariable} 
+Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percentage, double evalpercent) 
+    : CSVFile(Name), ColumnIndexForDependentVariable{ColumnIndexForDependentVariable}, trainingPercentage{Percentage}, EVALPERCENTAGE{evalpercent}
     {
     file.open(fileName);
     if(!file.is_open()){
-        throw invalid_argument("File not found");
+        throw invalid_argument(fileName + ' ' + "not found");
     }
     NumberOfRows = 0;
 
-
-        EVALPERCENTAGE = 0.1;
-        MaxVariablesQty = MaxNumOfVariables(file);
-        InitializeDataPoints(file);
-
+    MaxVariablesQty = MaxNumOfVariables(file);
+    InitializeDataPoints(file);
 
     file.close();
 
@@ -90,21 +87,15 @@ Data::Data(const Data& d)
     : CSVFile{d.fileName}, MaxVariablesQty{d.MaxVariablesQty}, 
       NameOfAllVariables{d.NameOfAllVariables}, 
       ColumnIndexForDependentVariable{d.ColumnIndexForDependentVariable}, 
+      trainingPercentage{d.trainingPercentage},
       DP{d.DP}, Training{d.Training}, Testing{d.Testing}, NumberOfRows{d.NumberOfRows},
       MinX{d.MinX}, MaxX{d.MaxX}, MeanX{d.MeanX}, StdX{d.StdX}, 
-      MinY{d.MinY}, MaxY{d.MaxY}, MeanY{d.MeanY}, StdY{d.StdY} 
-{
-    file.open(fileName);
-    if(!file.is_open()){
-        throw invalid_argument("File not found");
-    }
-
-    file.seekg(const_cast<ifstream&>(d.file).tellg());
-}
+      MinY{d.MinY}, MaxY{d.MaxY}, MeanY{d.MeanY}, StdY{d.StdY}, EVALPERCENTAGE{d.EVALPERCENTAGE} 
+{}
 
 int Data::MaxNumOfVariables(ifstream & file) {
     if(!file.is_open()){
-        throw invalid_argument("File not found");
+        throw invalid_argument(fileName + ' ' + "not found");
     }
     string temp;
     string Var = "";
@@ -213,6 +204,7 @@ void Data::InitializeDataPoints(ifstream & file) {
                 }
             }
             DP.push_back(DataPoint(tempX,tempY));
+            
             NumberOfRows++;
         }
     }
@@ -231,13 +223,20 @@ Data Data::GetEvalData(){
     Data temp = Data(*this);
 
     vector<DataPoint> tempDP;
+
     for (int i = 0 ; i < NumberOfRows * EVALPERCENTAGE ; i++){
         tempDP.push_back(DP[i]);
     }
+    temp.DP.clear();
+    temp.Testing.clear();
+    temp.Training.clear();
     temp.DP = tempDP;
     temp.NumberOfRows = tempDP.size();
     temp.EVALPERCENTAGE = 0;
-    
+
+/*     cout << endl << tempDP.size();
+    cout << endl << temp; */
+
     return temp;
 }
 void Data::InitializeTrainingData(double Percentage) {
@@ -257,7 +256,7 @@ void Data::InitializeTrainingData(double Percentage) {
         for (int i = NumOfLines2Skip ; i < NumberOfRows ; i++){
             if (i < NumOfLines){
                 Training.push_back(DP[i]);
-            }else{
+            }else{ 
                 Testing.push_back(DP[i]);
             }
         }

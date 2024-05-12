@@ -23,11 +23,11 @@
 
       best_epochs = epochs_range[ep(gen)];
 
-      bestBatchSize = DP.size() / 2;
+      bestBatchSize = DP.size() / 2 == 0? 1 : DP.size() / 2;
 
       model_->SetLearningRate(best_learningrate);
       //this->best_error = model_->MeanSquaredError(dataset_);
-      model_->Train(best_epochs,1, false);
+      model_->Train(best_epochs, bestBatchSize);
   
     for (int i = 0; i < 16; ++i) { 
         
@@ -48,7 +48,7 @@
         if(epochs < 0){
             throw std::invalid_argument("Epochs should be greater than 0");
         }else{  
-            model_->Train(epochs, batchSize , false);
+            model_->Train(epochs, batchSize);
         }
 
 

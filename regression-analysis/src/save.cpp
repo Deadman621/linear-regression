@@ -24,6 +24,7 @@ void SaveModel::Save(const Model& model, const string& filename) {
     file.write(model.data.fileName.c_str(), filenameSize);
     file.write(reinterpret_cast<const char*>(&model.data.ColumnIndexForDependentVariable), sizeof(model.data.ColumnIndexForDependentVariable));
     file.write(reinterpret_cast<const char*>(&model.data.trainingPercentage), sizeof(model.data.trainingPercentage));
+    file.write(reinterpret_cast<const char*>(&model.data.EVALPERCENTAGE), sizeof(model.data.EVALPERCENTAGE));
     file.write(reinterpret_cast<const char*>(&model.b), sizeof(model.b));
     file.write(reinterpret_cast<const char*>(&model.error), sizeof(model.error));
 
@@ -45,17 +46,19 @@ Model SaveModel::Load(const string& filename) {
     size_t filenameSize;
     file.read(reinterpret_cast<char*>(&filenameSize), sizeof(filenameSize));
 
-    char* filenameBuffer = new char[filenameSize + 1];
+    char* filenameBuffer = new char[filenameSize + 1]; 
     file.read(filenameBuffer, filenameSize);
     filenameBuffer[filenameSize] = '\0';
 
     int ColumnIndexForDependantVariable;
     double trainingPercentage;
+    double evalpercent;
 
     file.read(reinterpret_cast<char*>(&ColumnIndexForDependantVariable), sizeof(ColumnIndexForDependantVariable));
     file.read(reinterpret_cast<char*>(&trainingPercentage), sizeof(trainingPercentage));
+    file.read(reinterpret_cast<char*>(&evalpercent), sizeof(evalpercent));
 
-    Data d{filenameBuffer, ColumnIndexForDependantVariable, trainingPercentage};
+    Data d{filenameBuffer, ColumnIndexForDependantVariable, trainingPercentage, evalpercent};
     Model model{d};
     delete[] filenameBuffer;
 

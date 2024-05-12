@@ -32,7 +32,7 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
     friend class SaveModel;
 
     public:
-        Model(Data data);
+        Model(Data& data);
         Model(const Model& model);
 
         virtual double MeanSquaredError(const Data& d) const override;
@@ -42,7 +42,9 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         double GetLearningRate(void) const noexcept; 
 
         void DisplayPlot(void);
-        virtual void Train(bool display_batch = false, size_t epochs = 0, size_t batch_size = 0) override;
+        virtual void Train(bool display_batch = false) override;
+        virtual void Train(size_t epochs, size_t batch_size, bool display_batch = false) override;
+
         std::vector<double> Predict(const Data&) const;
 
         bool operator==(const Model& model) const;

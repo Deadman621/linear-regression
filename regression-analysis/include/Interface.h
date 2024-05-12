@@ -17,7 +17,8 @@ class iSaveable {
 
 class ITrainable {
     public:
-        virtual void Train(bool display_batch = false, size_t epochs = 0, size_t batch_size = 0) = 0;
+        virtual void Train(bool display_batch) = 0;
+        virtual void Train(size_t epochs, size_t batch_size, bool display_batch) = 0;
     };
 
 class IEvaluable {

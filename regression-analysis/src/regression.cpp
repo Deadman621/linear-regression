@@ -31,32 +31,33 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
     return y + model.b;
 }
 
-Model::Model(Data d) 
+Model::Model(Data& d) 
     : data{d}, b{0}, error{0}, 
-        learning_rate{learning_rate},
+        learning_rate{0.0001},
         numBatches{0}
 {
     tie(this->x, this->y) = data.getTrainingData(true, false);
 
     if (y.empty()) 
-        throw std::runtime_error("dataset is empty");
+        throw std::runtime_error("Y dataset is empty");
 
     for(auto const& data_point : x) 
         if (x.empty())
-            throw runtime_error{"datasets are empty"};
+            throw runtime_error{"X datasets are empty"};
 
     this->numFeatures = x[0].size();
     this->numDataPoints = y.size();
 
     m = vector<double>(numFeatures, 0.0);
-
-    Data evalData = d.GetEvalData();
-    evalData.InitializeTrainingData(0.8);
-    optimizer = new HyperParameteroptimization{evalData};
-    optimizer->setModel(this);
+ 
 }
 
 void Model::Optimize(void) {
+    Data evalData = this->data.GetEvalData();
+    evalData.InitializeTrainingData(0.8);
+    this->optimizer = new HyperParameteroptimization{evalData};
+    this->optimizer->setModel(new Model{evalData});
+
     vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1};
     vector<double> epochs_values;
 
@@ -68,6 +69,7 @@ void Model::Optimize(void) {
 
     double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
     double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+    this->learning_rate = optimizer->best_learningrate;
 }
 
 void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
@@ -131,23 +133,13 @@ void Model::GradientDescent(size_t start_index, size_t batch_size) {
     b -= b_gradient * learning_rate;
 }
 
-void Model::Train(bool display_batch, size_t epochs, size_t batch_size) {
+void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
     
-    Optimize();
-
-    if (epochs != 0)
-        epochs = optimizer->best_epochs;
+    if (epochs == 0)
+        throw invalid_argument{"Epochs cannot be zero (Train)"};
     
-    if (batch_size != 0)
-        batch_size = optimizer->bestBatchSize;
-        
-    this->learning_rate = optimizer->best_learningrate;
-
-    if (epochs == 0) 
-        throw invalid_argument{"Invalid number of epochs"};
-
-    if ((batch_size >= numDataPoints) || (batch_size == 0))
-        throw invalid_argument{"Invalid batch size"};
+    if (batch_size == 0)
+        throw invalid_argument{"Batch size cannot be zero (Train)"};
 
     for (size_t epoch = 0; epoch < epochs; epoch++) {
         for (size_t i = 0; i < numDataPoints; i += batch_size) {
@@ -159,6 +151,15 @@ void Model::Train(bool display_batch, size_t epochs, size_t batch_size) {
         if (epoch % 500 == 0 && display_batch) 
             cout << "Epoch: " << epoch << " Error: " << error << endl;
     }
+}
+
+void Model::Train(bool display_batch) {
+    Optimize();
+
+    size_t epochs = optimizer->best_epochs;
+    size_t batch_size = optimizer->bestBatchSize;
+
+    Model::Train(epochs, batch_size, display_batch);
 }
 
 void Model::DisplayPlot(void) {

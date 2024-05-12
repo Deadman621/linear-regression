@@ -32,17 +32,22 @@ double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_V
                 }
 
                 if(LearningRate_Values[i] > 1){
-                    throw std::invalid_argument("Learning rate should be less than 1");
+                    throw std::invalid_argument("Learning rate should be less than 1 in GridSearch");
                 }else if(LearningRate_Values[i] < 0){
-                    throw std::invalid_argument("Learning rate should be greater than 0");
+                    throw std::invalid_argument("Learning rate should be greater than 0 in GridSearch");
                 }else{
                     model_->SetLearningRate(LearningRate_Values[i]);
                 }
                 
                 if(epochs_values[j] < 0){
-                    throw std::invalid_argument("Epochs should be greater than 0");
+                    throw std::invalid_argument("Epochs should be greater than 0 in GridSearch");
                 }else{
-                    model_->Train(epochs_values[j],(batchSize_value[k] % (DP.size()/2)+1),false); 
+                    if (DP.size() > 1) {
+                        size_t bs = (batchSize_value[k] % (DP.size()/2)+1);
+                        model_->Train(epochs_values.at(j),bs);
+                    } else {
+                        throw std::runtime_error("Dataset is empty in GridSearch");
+                    } 
                 }
 
             

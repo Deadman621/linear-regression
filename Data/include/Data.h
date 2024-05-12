@@ -62,7 +62,7 @@ class Data : public CSVFile {
     std::vector<DataPoint> DP;
     std::vector<DataPoint> Training;
     std::vector<DataPoint> Testing;
-    
+     
     std::vector<double> MinX; 
     std::vector<double> MaxX; 
     std::vector<double> MeanX; 
@@ -73,7 +73,7 @@ class Data : public CSVFile {
     double StdY;
 
     int NumberOfRows;
-    Data(std::string Name, int ColumnIndexForDependentVariable, double trainingPercentage = 0.99); 
+    Data(std::string Name, int ColumnIndexForDependentVariable, double trainingPercentage, double evalPercentage); 
     
     public:
     Data(std::string Name);

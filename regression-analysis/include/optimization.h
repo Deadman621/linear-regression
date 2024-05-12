@@ -5,8 +5,6 @@
 
 #ifndef OPTIMIZATION_H
 #define OPTIMIZATION_H
-
-
 class Optimization {
     public:
         virtual double GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP, bool N=false, bool S=false) = 0;
