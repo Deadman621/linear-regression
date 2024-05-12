@@ -268,6 +268,9 @@ vector<DataPoint> Data::getTrainingDataPoints(bool WantNormalized, bool WantStan
         }
         return temp;
     }
+    // for(int i = 0 ; i < Training.size() ; i++){
+    //     Training[i].Display();
+    // }
     return Training;
 }
 
@@ -288,6 +291,9 @@ vector<DataPoint> Data::getTestingDataPoints(bool WantNormalized, bool WantStand
         }
         return temp;
     }
+    // for(int i = 0 ; i < Testing.size() ; i++){
+    //     Testing[i].Display();
+    // }
     return Testing;
 }
 

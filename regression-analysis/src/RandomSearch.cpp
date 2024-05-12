@@ -8,7 +8,7 @@
     // Return the best learning rate
       // Return the best number of epochs
 
-  std::tuple<double, double, int> HyperParameteroptimization::RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range, std::vector<DataPoint> DP){
+  std::tuple<double, double, int> HyperParameteroptimization::RandomSearch(std::vector<double> LearningRate_range,std::vector<double> epochs_range, std::vector<DataPoint> DP, bool N, bool S){
      
 
       std::random_device rd;
@@ -26,8 +26,8 @@
       int bestBatchSize;
 
       model_.SetLearningRate(best_learningrate);
+      double best_error = model_.MeanSquaredError(dataset_,N,S);
       model_.Train(best_epochs,1, false);
-      double best_error = model_.MeanSquaredError(dataset_);
 
   
     for (int i = 0; i < 32; ++i) { 
@@ -53,7 +53,7 @@
         }
 
 
-        double error = model_.MeanSquaredError(dataset_);
+        double error = model_.MeanSquaredError(dataset_,N,S);
         
         if (error < best_error) {
             best_learningrate = learningrate;

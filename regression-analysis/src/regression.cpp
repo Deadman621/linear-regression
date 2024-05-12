@@ -34,12 +34,12 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
     return y + model.b;
 }
 
-Model::Model(Data d, double learning_rate) 
+Model::Model(Data d, double learning_rate,bool N, bool S) 
     : data{d}, b{0}, error{0}, 
       learning_rate{learning_rate},
       numBatches{0} 
 {
-    tie(this->x, this->y) = data.getTrainingData(true,false);
+    tie(this->x, this->y) = data.getTrainingData(N,S);
 
     if (y.empty()) 
         throw std::runtime_error("dataset is empty");
@@ -71,11 +71,11 @@ double Model::MeanSquaredError(size_t start_index, size_t batch_size) {
 }
 
 // Check Error on Testing Dataset
-double Model::MeanSquaredError(const Data& d) const {
+double Model::MeanSquaredError(const Data& d,bool N, bool S) const {
     double Error = 0;
     vector<vector<double>> x;
     vector<double> y;
-    tie(x, y) = d.getTestingData();
+    tie(x, y) = d.getTestingData(N,S);
     for (int i = 0; i < y.size(); i++) 
         Error += pow((y[i] - RegressionEquation(*this, x[i])), 2);
     Error /= y.size();
@@ -83,11 +83,11 @@ double Model::MeanSquaredError(const Data& d) const {
     return Error;
 }
 
-double Model::MeanAbsolutePercentageError(const Data& d) const {
+double Model::MeanAbsolutePercentageError(const Data& d,bool N, bool S) const {
     double Error = 0;
     vector<vector<double>> x;
     vector<double> y;
-    tie(x, y) = d.getTestingData();
+    tie(x, y) = d.getTestingData(N,S);
     for (int i = 0; i < y.size(); i++) {
         double prediction = RegressionEquation(*this, x[i]);
         Error += abs((y[i] - prediction) / y[i]);
@@ -167,9 +167,9 @@ void Model::DisplayPlot(void) {
     } */
 }
 
-vector<double> Model::Predict(const Data& d) const {
+vector<double> Model::Predict(const Data& d, bool N, bool S) const {
     vector<double> predictions;
-    vector<vector<double>> test = d.getTestingData().first;
+    vector<vector<double>> test = d.getTestingData(N,S).first;
     for (size_t i = 0; i < test.size(); i++) 
         predictions.push_back(RegressionEquation(*this, test[i]));
 
