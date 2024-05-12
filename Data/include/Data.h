@@ -55,6 +55,7 @@ class Data : public CSVFile {
     std::vector<std::string> NameOfAllVariables;
     int ColumnIndexForDependentVariable;
     double trainingPercentage;
+    double EVALPERCENTAGE;
 
     std::vector<DataPoint> DP;
     std::vector<DataPoint> Training;
@@ -90,6 +91,7 @@ class Data : public CSVFile {
     Data& operator=(const Data& d);
     DataPoint NormalizeDataPoint(const DataPoint d) const;
     DataPoint StandardizeDataPoint(const DataPoint d) const;
+    Data GetEvalData();
     void DispNormalizedData();
     void DispStandardizedData();
     void DispAllData();
