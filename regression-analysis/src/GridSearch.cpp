@@ -39,7 +39,7 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
                 if(epochs_values[j] < 0){
                     throw std::invalid_argument("Epochs should be greater than 0");
                 }else{
-                    model_.Train(epochs_values[j],(batchSize_value[k] % DP.size()+1),false); 
+                    model_.Train(epochs_values[j],(batchSize_value[k] % (DP.size()/2)+1),false); 
                 }
 
             
