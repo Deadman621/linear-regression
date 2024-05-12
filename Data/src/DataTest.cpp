@@ -1,20 +1,21 @@
-#include<Data.h>
 #include<iostream>
 
 using namespace std;
 
+
+
 int main(void) {
     Data data("Data.csv");
-    data.DisplayData();
+    cout << data;
 
 
 
     double TrainingPer = 0.6;
     data.InitializeTrainingData(TrainingPer); //first call this 
 
-
-    vector <vector<double>> x = data.getTrainingX();
-    vector<double> y = data.getTrainingY();
+    pair<vector<vector<double>>, vector<double>> TrainingData = data.getTrainingData(); // then this 
+    vector <vector<double>> x = TrainingData.first;
+    vector <double> y = TrainingData.second;
 
     cout << "\n\nTraining data :-\n";
     for (int i = 0; i < x.size(); i++) {
@@ -24,11 +25,10 @@ int main(void) {
         cout << " | " << y[i] << endl;
     }
 
+    pair<vector<vector<double>>, vector<double>> TestingData = data.getTestingData(); // then this
+    vector<vector<double>> X = TestingData.first;
+    vector<double> Y = TestingData.second;
 
-    
-    vector<vector<double>> X = data.getTestingX();
-    vector<double> Y = data.getTestingY();
-    
     cout << "\n\nTesting data :-\n";
     for (int i = 0; i < X.size(); i++) {
         for (int j = 0; j < X[i].size(); j++) {

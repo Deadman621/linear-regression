@@ -1,5 +1,6 @@
 #include <Data.h>
 #include <limits>
+#include <Analysis.h>
 
 using namespace std;
 
@@ -43,7 +44,7 @@ double DataPoint::getX(int i) const{
 
 void DataPoint::Display() const{
     cout << x[0];
-    for (int i = 0; i < x.size(); i++) {
+    for (int i = 1; i < x.size(); i++) {
         cout << ", " << x[i];
     }
     cout << " | ";
@@ -55,9 +56,9 @@ Data::Data(string Name) : CSVFile(Name) {
     file.open(fileName);
     if(!file.is_open()){
         throw invalid_argument("File not found");
-        exit(1);
     }
     NumberOfRows = 0;
+    EVALPERCENTAGE = 0.3;
     MaxVariablesQty = MaxNumOfVariables(file);
     setDependentVariable();
     InitializeDataPoints(file);
@@ -71,9 +72,14 @@ Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percent
         file.open(fileName);
         if(!file.is_open()){
             throw invalid_argument("File not found");
-            exit(1);
         }
         NumberOfRows = 0;
+        MinX = numeric_limits<double>::max();
+        MaxX = numeric_limits<double>::min();
+        MinY = numeric_limits<double>::max();
+        MaxY = numeric_limits<double>::min();
+
+        EVALPERCENTAGE = 0.3;
         MaxVariablesQty = MaxNumOfVariables(file);
         InitializeDataPoints(file);
 
@@ -91,8 +97,12 @@ Data::Data(const Data& d)
         file.open(fileName);
         if(!file.is_open()){
             throw invalid_argument("File not found");
-            exit(1);
         }
+        EVALPERCENTAGE = 0.3;
+        MinX = numeric_limits<double>::max();
+        MaxX = numeric_limits<double>::min();
+        MinY = numeric_limits<double>::max();
+        MaxY = numeric_limits<double>::min();
 
         file.seekg(const_cast<ifstream&>(d.file).tellg());
     }
@@ -100,7 +110,6 @@ Data::Data(const Data& d)
 int Data::MaxNumOfVariables(ifstream & file) {
     if(!file.is_open()){
         throw invalid_argument("File not found");
-        exit(1);
     }
     string temp;
     string Var = "";
@@ -171,7 +180,6 @@ void Data::setDependentVariable() {
 void Data::InitializeDataPoints(ifstream & file) {
     if(!file.is_open()){
        throw invalid_argument("File not found");
-        exit(1);
     }
     string temp;
     file.seekg(0);
@@ -204,8 +212,33 @@ void Data::InitializeDataPoints(ifstream & file) {
         }
     }
     NumberOfRows + 1;
+    pair<double, double> Mean = AnalysisTools::Mean(DP);
+    MeanX = Mean.first;
+    MeanY = Mean.second;
+    pair<double, double> Std = AnalysisTools::StandardDeviation(DP);
+    StdX = Std.first;
+    StdY = Std.second;
+    pair<double, double> min = AnalysisTools::Min(DP);
+    MinX = min.first;
+    MinY = min.second;
+    pair<double, double> max = AnalysisTools::Max(DP);
+    MaxX = max.first;
+    MaxY = max.second;
 }
 
+Data Data::GetEvalData(){
+
+    Data temp = Data(*this);
+    vector<DataPoint> tempDP;
+    for (int i = 0 ; i < NumberOfRows * EVALPERCENTAGE ; i++){
+        tempDP.push_back(DP[i]);
+    }
+    temp.DP = tempDP;
+    temp.NumberOfRows = tempDP.size();
+    temp.EVALPERCENTAGE = 0;
+    
+    return temp;
+}
 void Data::InitializeTrainingData(double Percentage) {
     
     if (Percentage < 0 || Percentage > 1){
@@ -218,8 +251,9 @@ void Data::InitializeTrainingData(double Percentage) {
         Training.clear();
         Testing.clear();
         double NumOfLines = NumberOfRows * Percentage;
+        double NumOfLines2Skip = NumberOfRows * EVALPERCENTAGE;
 
-        for (int i = 0 ; i < NumberOfRows ; i++){
+        for (int i = NumOfLines2Skip ; i < NumberOfRows ; i++){
             if (i < NumOfLines){
                 Training.push_back(DP[i]);
             }else{
@@ -233,11 +267,49 @@ size_t Data::getNumDataPoints() const {
     return NumberOfRows;
 }
 
-vector<DataPoint> Data::getTrainingDataPoints() const {
+vector<DataPoint> Data::getTrainingDataPoints(bool WantNormalized, bool WantStandardized) const {
+    if (WantNormalized && WantStandardized) {
+        throw invalid_argument("Cannot Normalize and Standardize at the same time");
+    }
+    if (WantNormalized) {
+        vector<DataPoint> temp;
+        for (int i = 0; i < Training.size(); i++) {
+            temp.push_back(NormalizeDataPoint(Training[i]));
+        }
+        return temp;
+    } else if (WantStandardized) {
+        vector<DataPoint> temp;
+        for (int i = 0; i < Training.size(); i++) {
+            temp.push_back(StandardizeDataPoint(Training[i]));
+        }
+        return temp;
+    }
+    // for(int i = 0 ; i < Training.size() ; i++){
+    //     Training[i].Display();
+    // }
     return Training;
 }
 
-vector<DataPoint> Data::getTestingDataPoints() const {
+vector<DataPoint> Data::getTestingDataPoints(bool WantNormalized, bool WantStandardized) const {
+    if (WantNormalized && WantStandardized) {
+        throw invalid_argument("Cannot Normalize and Standardize at the same time");
+    }
+    if (WantNormalized) {
+        vector<DataPoint> temp;
+        for (int i = 0; i < Testing.size(); i++) {
+            temp.push_back(NormalizeDataPoint(Testing[i]));
+        }
+        return temp;
+    } else if (WantStandardized) {
+        vector<DataPoint> temp;
+        for (int i = 0; i < Testing.size(); i++) {
+            temp.push_back(StandardizeDataPoint(Testing[i]));
+        }
+        return temp;
+    }
+    // for(int i = 0 ; i < Testing.size() ; i++){
+    //     Testing[i].Display();
+    // }
     return Testing;
 }
 
@@ -257,25 +329,115 @@ ostream& operator<<(ostream& os, const Data& data) {
         os << " | " << data.DP[i].getY();
         os << endl;
     }
+    os << "\nTraining Data :- " << endl;
+    for(int i = 0; i < data.Training.size(); i++) {
+        os << i+1 << ". ";
+        for(int j = 0; j < data.Training[i].x.size(); j++) {
+            os << data.Training[i].x[j] << ", ";
+        }
+        os << " | " << data.Training[i].getY();
+        os << endl;
+    }
+    os << "\nTesting Data :- " << endl;
+    for(int i = 0; i < data.Testing.size(); i++) {
+        os << i+1 << ". ";
+        for(int j = 0; j < data.Testing[i].x.size(); j++) {
+            os << data.Testing[i].x[j] << ", ";
+        }
+        os << " | " << data.Testing[i].getY();
+        os << endl;
+    }
     return os;
 }
 
-pair<vector<vector<double>>, vector<double>> Data::getTrainingData() const {
+DataPoint Data::NormalizeDataPoint(const DataPoint d) const {
+    vector<double> tempX = d.getX();
+    double tempY = d.getY();
+    for (int i = 0; i < tempX.size(); i++) {
+        tempX[i] = (tempX[i] - MinX) / (MaxX - MinX);
+    }
+    tempY = (tempY - MinY) / (MaxY - MinY);
+    DataPoint temp = DataPoint(tempX, tempY);
+    return temp;
+}
+DataPoint Data::StandardizeDataPoint(const DataPoint d) const { //useful when there are alot of outliers 
+    vector<double> tempX = d.getX();
+    double tempY = d.getY();
+    for (int i = 0; i < tempX.size(); i++) {
+        tempX[i] = (tempX[i] - MeanX) / StdX;
+    }
+
+    tempY = (tempY - MeanY) / StdY;
+    DataPoint temp(tempX, tempY);
+    return temp;
+}
+
+void Data::DispNormalizedData(){
+    cout << "\nAll Normalized Data :- " << endl;
+    for (int i = 0; i < DP.size(); i++) {
+        DataPoint temp = NormalizeDataPoint(DP[i]);
+        temp.Display();
+    }
+}
+
+void Data::DispStandardizedData(){
+    cout << "\nAll Standardized Data :- " << endl;
+    for (int i = 0; i < DP.size(); i++) {
+        DataPoint temp = StandardizeDataPoint(DP[i]);
+        temp.Display();
+    }
+}
+
+void Data::DispAllData(){
+    cout << "\nAll Data :- " << endl;
+    for (int i = 0; i < DP.size(); i++) {
+        DP[i].Display();
+    }
+}
+
+pair<vector<vector<double>>, vector<double>> Data::getTrainingData(bool WantNormalized, bool WantStandardized) const {
+    if (WantNormalized && WantStandardized) {
+        throw invalid_argument("Cannot Normalize and Standardize at the same time");
+    }
     vector<vector<double>> X;
     vector<double> Y;
     for (int i = 0; i < Training.size(); i++) {
-        X.push_back(Training[i].getX());
-        Y.push_back(Training[i].getY());
+        if (WantNormalized) {
+            DataPoint temp = NormalizeDataPoint(Training[i]);
+            X.push_back(temp.getX());
+            Y.push_back(temp.getY());
+        } else if (WantStandardized) {
+            DataPoint temp = StandardizeDataPoint(Training[i]);
+            X.push_back(temp.getX());
+            Y.push_back(temp.getY());
+        } else {
+            X.push_back(Training[i].getX());
+            Y.push_back(Training[i].getY());
+        }
     }
     return make_pair(X, Y);
 }
 
-pair<vector<vector<double>>, vector<double>> Data::getTestingData() const {
+pair<vector<vector<double>>, vector<double>> Data::getTestingData(bool WantNormalized, bool WantStandardized) const {
+    if (WantNormalized && WantStandardized) {
+        throw invalid_argument("Cannot Normalize and Standardize at the same time");
+    }
     vector<vector<double>> X;
     vector<double> Y;
+    DataPoint temp;
     for (int i = 0; i < Testing.size(); i++) {
-        X.push_back(Testing[i].getX());
-        Y.push_back(Testing[i].getY());
+        if (WantNormalized) {
+            temp = NormalizeDataPoint(Testing[i]);
+            X.push_back(temp.getX());
+            Y.push_back(temp.getY());
+        } else if (WantStandardized) {
+            temp = StandardizeDataPoint(Testing[i]);
+            X.push_back(temp.getX());
+            Y.push_back(temp.getY());
+        } else {
+            X.push_back(Testing[i].getX());
+            Y.push_back(Testing[i].getY());
+        }
     }
     return make_pair(X, Y);
 }
