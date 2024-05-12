@@ -13,7 +13,7 @@
     
 
 
-std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP){
+std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_Values,std::vector<double> epochs_values,std::vector<DataPoint> DP, bool N, bool S){
     
     std::vector<int> batchSize_value = {32, 64, 128, 256, 512};
     double best_learningrate = LearningRate_Values[0];
@@ -21,7 +21,7 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
     int bestBatchSize;
     
     
-    double error = model_.MeanSquaredError(dataset_);
+    double error = model_.MeanSquaredError(dataset_,N,S);
     std::vector<double> predictions;
     
     for (int i=0;i<LearningRate_Values.size();i++) {
@@ -39,12 +39,12 @@ std::tuple<double, double, int>  HyperParameteroptimization::GridSearch(std::vec
                 if(epochs_values[j] < 0){
                     throw std::invalid_argument("Epochs should be greater than 0");
                 }else{
-                    model_.Train(epochs_values[j],(batchSize_value[k] % DP.size()+1),false); 
+                    model_.Train(epochs_values[j],(batchSize_value[k] % (DP.size()/2)+1),false); 
                 }
 
             
-                predictions = model_.Predict(dataset_);
-                double next_error = model_.MeanSquaredError(dataset_);
+                predictions = model_.Predict(dataset_,N,S);
+                double next_error = model_.MeanSquaredError(dataset_,N,S);
 
                 if(next_error < error){
                     error = next_error;

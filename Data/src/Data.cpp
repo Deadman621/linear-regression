@@ -58,6 +58,7 @@ Data::Data(string Name) : CSVFile(Name) {
         throw invalid_argument("File not found");
     }
     NumberOfRows = 0;
+    EVALPERCENTAGE = 0.3;
     MaxVariablesQty = MaxNumOfVariables(file);
     setDependentVariable();
     InitializeDataPoints(file);
@@ -74,7 +75,11 @@ Data::Data(std::string Name, int ColumnIndexForDependentVariable, double Percent
     }
     NumberOfRows = 0;
 
-    InitializeDataPoints(file);
+
+        EVALPERCENTAGE = 0.3;
+        MaxVariablesQty = MaxNumOfVariables(file);
+        InitializeDataPoints(file);
+
 
     file.close();
 
@@ -221,7 +226,19 @@ void Data::InitializeDataPoints(ifstream & file) {
     StdY = Std.second;
 }
 
+Data Data::GetEvalData(){
 
+    Data temp = Data(*this);
+    vector<DataPoint> tempDP;
+    for (int i = 0 ; i < NumberOfRows * EVALPERCENTAGE ; i++){
+        tempDP.push_back(DP[i]);
+    }
+    temp.DP = tempDP;
+    temp.NumberOfRows = tempDP.size();
+    temp.EVALPERCENTAGE = 0;
+    
+    return temp;
+}
 void Data::InitializeTrainingData(double Percentage) {
     
     if (Percentage < 0 || Percentage > 1){
@@ -234,8 +251,9 @@ void Data::InitializeTrainingData(double Percentage) {
         Training.clear();
         Testing.clear();
         double NumOfLines = NumberOfRows * Percentage;
+        double NumOfLines2Skip = NumberOfRows * EVALPERCENTAGE;
 
-        for (int i = 0 ; i < NumberOfRows ; i++){
+        for (int i = NumOfLines2Skip ; i < NumberOfRows ; i++){
             if (i < NumOfLines){
                 Training.push_back(DP[i]);
             }else{
@@ -266,6 +284,9 @@ vector<DataPoint> Data::getTrainingDataPoints(bool WantNormalized, bool WantStan
         }
         return temp;
     }
+    // for(int i = 0 ; i < Training.size() ; i++){
+    //     Training[i].Display();
+    // }
     return Training;
 }
 
@@ -286,6 +307,9 @@ vector<DataPoint> Data::getTestingDataPoints(bool WantNormalized, bool WantStand
         }
         return temp;
     }
+    // for(int i = 0 ; i < Testing.size() ; i++){
+    //     Testing[i].Display();
+    // }
     return Testing;
 }
 
@@ -303,6 +327,24 @@ ostream& operator<<(ostream& os, const Data& data) {
             os << data.DP[i].x[j] << ", ";
         }
         os << " | " << data.DP[i].getY();
+        os << endl;
+    }
+    os << "\nTraining Data :- " << endl;
+    for(int i = 0; i < data.Training.size(); i++) {
+        os << i+1 << ". ";
+        for(int j = 0; j < data.Training[i].x.size(); j++) {
+            os << data.Training[i].x[j] << ", ";
+        }
+        os << " | " << data.Training[i].getY();
+        os << endl;
+    }
+    os << "\nTesting Data :- " << endl;
+    for(int i = 0; i < data.Testing.size(); i++) {
+        os << i+1 << ". ";
+        for(int j = 0; j < data.Testing[i].x.size(); j++) {
+            os << data.Testing[i].x[j] << ", ";
+        }
+        os << " | " << data.Testing[i].getY();
         os << endl;
     }
     return os;
