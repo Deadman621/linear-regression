@@ -39,7 +39,7 @@ Model::Model(Data d, double learning_rate)
       learning_rate{learning_rate},
       numBatches{0} 
 {
-    tie(this->x, this->y) = data.getTrainingData();
+    tie(this->x, this->y) = data.getTrainingData(true,false);
 
     if (y.empty()) 
         throw std::runtime_error("dataset is empty");

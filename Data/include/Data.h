@@ -59,6 +59,16 @@ class Data : public CSVFile {
     std::vector<DataPoint> DP;
     std::vector<DataPoint> Training;
     std::vector<DataPoint> Testing;
+    
+    double MinX;
+    double MaxX;
+    double MinY;
+    double MaxY;
+    double MeanX;
+    double MeanY;
+    double StdX;
+    double StdY;
+
     int NumberOfRows;
     Data(std::string Name, int ColumnIndexForDependentVariable, double trainingPercentage = 0.99); 
     
@@ -72,12 +82,17 @@ class Data : public CSVFile {
     void InitializeDataPoints(std::ifstream & file);
     void InitializeTrainingData(double Percentage);
     std::size_t getNumDataPoints() const;
-    std::vector<DataPoint> getTrainingDataPoints() const;
-    std::vector<DataPoint> getTestingDataPoints() const;
-    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTrainingData() const;
-    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTestingData() const;
+    std::vector<DataPoint> getTrainingDataPoints(bool WantNormalized = false, bool WantStandardized = false) const;
+    std::vector<DataPoint> getTestingDataPoints(bool WantNormalized = false, bool WantStandardized = false) const;
+    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTrainingData(bool WantNormalized = false, bool WantStandardized = false) const;
+    std::pair<std::vector<std::vector<double>>, std::vector<double>> getTestingData(bool WantNormalized = false, bool WantStandardized = false) const;
     bool operator==(const Data& d) const;
     Data& operator=(const Data& d);
+    DataPoint NormalizeDataPoint(const DataPoint d) const;
+    DataPoint StandardizeDataPoint(const DataPoint d) const;
+    void DispNormalizedData();
+    void DispStandardizedData();
+    void DispAllData();
 
     friend std::ostream& operator<<(std::ostream& os, const Data& d);
     friend class SaveModel;
