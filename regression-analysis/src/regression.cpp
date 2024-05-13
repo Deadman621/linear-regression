@@ -228,7 +228,7 @@ void Model::DisplayPlot(void) {
         z_line = data.DeNormalizeY(z_line);
 
         matplot::figure();
-        matplot::scatter3(dx0, dx1, dy)->color("green").marker_size(10);
+        matplot::scatter3(dx0, dx1, dy)->color("black").marker(".").fill(true).marker_size(10);
         matplot::hold(matplot::on);
         matplot::plot3(x_line, y_line, z_line)->color("black").line_width(2.0);
         matplot::view(-30, 1);

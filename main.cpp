@@ -1,4 +1,5 @@
 #include<iomanip>
+#include<Analysis.h>
 #include<regression.h>
 
 using namespace std;
@@ -8,23 +9,33 @@ int main(void) {
     try {
         const string path = "D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\";
         
-        Data data{path + "Datasets\\Data.csv", 0.1};
+        Data data{path + "Datasets\\rainfall.csv", 0.1};
         SaveModel s{path + "Trained Models\\"};
-
         data.InitializeTrainingData(0.8);
+
         Model model{data};
 
-        //model.Train();
-        model = s.Load("Student_Performance");
+        model.SetLearningRate(0.0001);
+        model.Train();
         vector<double> predicted = model(data);
+
+        double pDev = AnalysisTools::StandardDeviation(data.getTrainingData().second);
+        double pMean = AnalysisTools::Mean(data.getTrainingData().second);
+        double pMedian = AnalysisTools::Median(data.getTrainingData().second);
+
+        cout << endl << "Training Output Analysis: " << endl;
+        cout << "Standard Deviation: " << pDev << endl;
+        cout << "Mean: " << pMean << endl;
+        cout << "Median: " << pMedian << endl;
 
         model.DisplayPlot();
         cout << endl;
         for (int i = 0; i < data.getTestingData().second.size(); i++) 
             cout << "Predicted: " << predicted[i] << setw(10) << "Actual: " << data.getTestingData().second[i] << endl;
         cout << "Error: " << model.MeanAbsolutePercentageError(data) << '%';
+        cout << endl;
 
-        //s.Save(model, "Student_Performance");
+        s.Save(model, "multiple_linear_regression_dataset");
 
     } catch (const std::ios_base::failure& e) {
         cout << "File operation failed: " << e.what() << endl;
