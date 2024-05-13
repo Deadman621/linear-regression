@@ -39,7 +39,7 @@ Model::Model(Data& d)
     tie(this->x, this->y) = data.getTrainingData(true, false);
 
     if (y.empty()) 
-        throw std::runtime_error("Y dataset is empty");
+        throw runtime_error("Y dataset is empty");
 
     for(auto const& data_point : x) 
         if (x.empty())
@@ -53,23 +53,49 @@ Model::Model(Data& d)
 }
 
 void Model::Optimize(void) {
-    Data evalData = this->data.GetEvalData();
-    evalData.InitializeTrainingData(0.8);
-    this->optimizer = new HyperParameteroptimization{evalData};
-    this->optimizer->setModel(new Model{evalData});
+    try {
+        Data evalData = this->data.GetEvalData();    
+        evalData.InitializeTrainingData(0.8);
 
-    vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1};
-    vector<double> epochs_values;
+        if (this->optimizer == nullptr) {
+            this->optimizer = new HyperParameteroptimization{evalData};
+            if (this->optimizer == nullptr)
+                throw runtime_error{"Failed to initialize optimizer"};
 
-    for(size_t i = 0; i < 5; i++) {
-        int epochs = numDataPoints / (100 * (i + 1));
-        epochs = std::max(epochs, 1); 
-        epochs_values.push_back(epochs);
+            if (this->optimizer->model_ == nullptr) {
+                Model* model = new Model{evalData};
+                if (model == nullptr)
+                    throw runtime_error{"Failed to initialize model"};
+                this->optimizer->setModel(model);
+            }
+        }
+
+        vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1};
+        vector<double> epochs_values;
+
+        for(size_t i = 0; i < 5; i++) {
+            int epochs = numDataPoints / (100 * (i + 1));
+            epochs = max(epochs, 1); 
+            epochs_values.push_back(epochs);
+        }
+
+        double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+        double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+        this->learning_rate = optimizer->best_learningrate;
+
+    } catch (const runtime_error& e) {
+        cerr << "Runtime error: " << e.what() << endl;
+        delete this->optimizer;
+        this->optimizer = nullptr;
+    } catch (const exception& e) {
+        cerr << "Exception: " << e.what() << endl;
+        delete this->optimizer;
+        this->optimizer = nullptr;
+    } catch (...) {
+        cerr << "Unknown exception caught" << endl;
+        delete this->optimizer;
+        this->optimizer = nullptr;
     }
-
-    double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
-    double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
-    this->learning_rate = optimizer->best_learningrate;
 }
 
 void Model::SetLearningRate(double rate) { this->learning_rate = rate; }
@@ -149,7 +175,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
         }
 
         if (epoch % 500 == 0 && display_batch) 
-            cout << "Epoch: " << epoch << " Error: " << error << endl;
+            cout << "Epoch: " << epoch << " Error: " << error * 100 << endl;
     }
 }
 
@@ -269,4 +295,9 @@ vector<double> Model::operator()(const vector<vector<double>>& x) const {
 
 vector<double> Model::operator()(const Data& d) const {
     return Predict(d);
+}
+
+Model::~Model(void) {
+    if (this->optimizer != nullptr) 
+        delete this->optimizer;
 }

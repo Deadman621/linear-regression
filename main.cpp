@@ -1,13 +1,5 @@
-#include<iostream>
 #include<iomanip>
-#include<vector>
-#include<random>
-#include<algorithm>
 #include<regression.h>
-#include<Data.h>
-#include<Analysis.h>
-#include<HyperParameterOptimization.h>
-#include<stdexcept>
 
 using namespace std;
 
@@ -24,7 +16,7 @@ int main(void) {
 /*         model = s.Load("Student_Performance");
         cout << model; */
 
-        model.Train();
+        model.Train(true);
 
         vector<double> predicted = model(data);
 

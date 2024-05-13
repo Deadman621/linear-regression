@@ -66,7 +66,7 @@ double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_V
         }
     }
 
-    bestBatchSize = (bestBatchSize%DP.size())+1;
+    //bestBatchSize = (bestBatchSize%DP.size())+1;
 
     return best_error;
 }

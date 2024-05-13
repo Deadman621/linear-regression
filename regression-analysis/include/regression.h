@@ -10,7 +10,7 @@ class HyperParameteroptimization;
 class Model: public ITrainable, public IEvaluable, public IDisplayable {
     private:
         Data data;
-        HyperParameteroptimization* optimizer;
+        HyperParameteroptimization* optimizer = nullptr;
         double b;
         double error;
         std::size_t numFeatures;
@@ -51,6 +51,8 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         Model& operator=(const Model& model);
         std::vector<double> operator()(const std::vector<std::vector<double>>&) const;
         std::vector<double> operator()(const Data&) const;
+
+        ~Model(void);
 };
 
 class SaveModel: public iSaveable<Model> {
