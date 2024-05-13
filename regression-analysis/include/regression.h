@@ -1,4 +1,5 @@
 #include<Data.h>
+#include<limits>
 
 #ifndef REGRESSION_H
 #define REGRESSION_H
@@ -7,7 +8,7 @@
 
 class HyperParameteroptimization;
 
-class Model: public ITrainable, public IEvaluable, public IDisplayable {
+class Model: public ITrainable, public IEvaluable, public IModelManager, public IDisplayable {
     private:
         Data data;
         HyperParameteroptimization* optimizer = nullptr;
@@ -46,6 +47,15 @@ class Model: public ITrainable, public IEvaluable, public IDisplayable {
         virtual void Train(size_t epochs, size_t batch_size, bool display_batch = false) override;
 
         std::vector<double> Predict(const Data&) const;
+        inline void Reset(void) override { 
+            if (this->numFeatures == 0)
+                return;
+            this->b = 0;
+            this->error = std::numeric_limits<double>::max();
+            this->m.clear();
+            this->m.resize(this->numFeatures, 0);
+            this->learning_rate = 0.01;
+        }
 
         bool operator==(const Model& model) const;
         Model& operator=(const Model& model);

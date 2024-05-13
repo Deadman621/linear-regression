@@ -32,7 +32,7 @@ double RegressionEquation(const Model& model, const vector<double>& x) {
 }
 
 Model::Model(Data& d) 
-    : data{d}, b{0}, error{0}, 
+    : data{d}, b{0}, error{numeric_limits<double>::max()}, 
         learning_rate{0.0001},
         numBatches{0}
 {
@@ -81,6 +81,7 @@ void Model::Optimize(void) {
 
         double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
         double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+
         this->learning_rate = optimizer->best_learningrate;
 
     } catch (const runtime_error& e) {
@@ -175,7 +176,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
         }
 
         if (epoch % 500 == 0 && display_batch) 
-            cout << "Epoch: " << epoch << " Error: " << error * 100 << endl;
+            cout << "Epoch: " << epoch << " MSE: " << error << endl;
     }
 }
 

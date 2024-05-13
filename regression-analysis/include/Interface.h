@@ -28,6 +28,11 @@ class IEvaluable {
         virtual double MeanSquaredError(const Data& d) const = 0;
     };
 
+class IModelManager {
+public:
+    virtual void Reset(void) = 0;
+};
+
 class IDisplayable {
     public:
         virtual void DisplayPlot(void) = 0;

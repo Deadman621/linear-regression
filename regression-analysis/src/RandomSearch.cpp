@@ -19,9 +19,9 @@
       std::uniform_int_distribution<> lr(0, LearningRate_range.size() - 1);
       std::uniform_int_distribution<> ep(0, epochs_range.size() - 1);
 
-      best_learningrate = LearningRate_range[lr(gen)];
+/*       best_learningrate = LearningRate_range[lr(gen)];
 
-      best_epochs = epochs_range[ep(gen)];
+      best_epochs = epochs_range[ep(gen)]; */
 
       bestBatchSize = DP.size() / 2 == 0? 1 : DP.size() / 2;
 
@@ -29,7 +29,9 @@
       //this->best_error = model_->MeanSquaredError(dataset_);
       model_->Train(best_epochs, bestBatchSize);
   
-    for (int i = 0; i < 16; ++i) { 
+    for (int i = 0; i < 32; ++i) { 
+
+        model_->Reset();
         
         double learningrate = LearningRate_range[lr(gen)];
         
@@ -55,12 +57,12 @@
         double error = model_->MeanSquaredError(dataset_);
         
         if (error < best_error) {
-            best_error = error;
-            best_learningrate = learningrate;
-            best_epochs = epochs;
-            bestBatchSize = batchSize;
+            this->best_error = error;
+            this->best_learningrate = learningrate;
+            this->best_epochs = epochs;
+            this->bestBatchSize = batchSize;
         }
     }
 
-    return best_error;
+    return this->best_error;
   };

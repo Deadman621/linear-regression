@@ -26,6 +26,8 @@ double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_V
     for (int i=0;i<LearningRate_Values.size();i++) {
         for (int j=0;j<epochs_values.size();j++) {
             for(int k=0;k<batchSize_value.size();k++){
+                
+                model_->Reset();
 
                 if (batchSize_value[k] > DP.size()) {
                     batchSize_value[k] = DP.size();
@@ -55,10 +57,10 @@ double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_V
                 double next_error = model_->MeanSquaredError(dataset_);
 
                 if(next_error < best_error){
-                    best_error = next_error;
-                    best_learningrate = LearningRate_Values[i];
-                    best_epochs = epochs_values[j];
-                    bestBatchSize = batchSize_value[k];
+                    this->best_error = next_error;
+                    this->best_learningrate = LearningRate_Values[i];
+                    this->best_epochs = epochs_values[j];
+                    this->bestBatchSize = batchSize_value[k];
 
                 }
 
@@ -68,5 +70,5 @@ double HyperParameteroptimization::GridSearch(std::vector<double> LearningRate_V
 
     //bestBatchSize = (bestBatchSize%DP.size())+1;
 
-    return best_error;
+    return this->best_error;
 }
