@@ -76,7 +76,7 @@ class Data : public CSVFile {
     Data(std::string Name, int ColumnIndexForDependentVariable, double trainingPercentage, double evalPercentage); 
     
     public:
-    Data(std::string Name);
+    Data(std::string Name, double EVALPERCENTAGE);
     Data(const Data& d);
     int MaxNumOfVariables(std::ifstream & file);
     bool areAllFieldsCorrect(std::string temp);

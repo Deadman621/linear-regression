@@ -52,13 +52,17 @@ void DataPoint::Display() const{
 }
 
 // Implementations of Data class
-Data::Data(string Name) : CSVFile(Name) {
+Data::Data(string Name, double EVALPERCENTAGE) : CSVFile(Name) {
     file.open(fileName);
     if(!file.is_open()){
         throw invalid_argument(fileName + ' ' + "not found");
     }
     NumberOfRows = 0;
-    this->EVALPERCENTAGE = 0.1;
+    if (EVALPERCENTAGE < 0 || EVALPERCENTAGE > 1)
+        throw invalid_argument{"EVALPERCENT Must be in range of 0-1"};
+    else 
+        this->EVALPERCENTAGE = EVALPERCENTAGE;
+    
     MaxVariablesQty = MaxNumOfVariables(file);
     setDependentVariable();
     InitializeDataPoints(file);

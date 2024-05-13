@@ -14,9 +14,9 @@ private:
     ~HyperParameteroptimization(void) { if (this->model_ != nullptr) delete this->model_; }
 
     double best_error = std::numeric_limits<double>::max();
-    size_t bestBatchSize;
-    double best_learningrate;
-    double best_epochs;
+    size_t bestBatchSize{1};
+    double best_learningrate{0.001};
+    double best_epochs{1};
     Model* model_ = nullptr;
     Data& dataset_; 
     void setModel(Model* model) { model_ = model; }

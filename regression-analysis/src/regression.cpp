@@ -71,16 +71,20 @@ void Model::Optimize(void) {
         }
 
         vector<double> LearningRate_Values{0.0001, 0.001, 0.01, 0.1};
-        vector<double> epochs_values;
+        vector<double> epochs_values{10, 50, 70, 100, 200, 300, 400, 500, 1000};
 
-        for(size_t i = 0; i < 5; i++) {
+/*         for(size_t i = 0; i < 5; i++) {
             int epochs = numDataPoints / (100 * (i + 1));
             epochs = max(epochs, 1); 
             epochs_values.push_back(epochs);
-        }
+        } */
 
         double GridSearch = optimizer->GridSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
         double RandomSearch = optimizer->RandomSearch(LearningRate_Values, epochs_values, this->optimizer->dataset_.getTrainingDataPoints(true, false));
+
+/*         cout << "Best Learning Rate: " << optimizer->best_learningrate << endl;
+        cout << "Best Epochs: " << optimizer->best_epochs << endl;
+        cout << "Best Batch Size: " << optimizer->bestBatchSize << endl; */
 
         this->learning_rate = optimizer->best_learningrate;
 

@@ -21,16 +21,18 @@
 
 /*       best_learningrate = LearningRate_range[lr(gen)];
 
-      best_epochs = epochs_range[ep(gen)]; */
+      best_epochs = epochs_range[ep(gen)]; 
 
       bestBatchSize = DP.size() / 2 == 0? 1 : DP.size() / 2;
+
 
       model_->SetLearningRate(best_learningrate);
       //this->best_error = model_->MeanSquaredError(dataset_);
       model_->Train(best_epochs, bestBatchSize);
+
+*/
   
     for (int i = 0; i < 32; ++i) { 
-
         model_->Reset();
         
         double learningrate = LearningRate_range[lr(gen)];
@@ -63,6 +65,7 @@
             this->bestBatchSize = batchSize;
         }
     }
+    
 
     return this->best_error;
   };
