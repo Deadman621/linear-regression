@@ -85,17 +85,18 @@ void Model::Optimize(void) {
         this->learning_rate = optimizer->best_learningrate;
 
     } catch (const runtime_error& e) {
-        cerr << "Runtime error: " << e.what() << endl;
         delete this->optimizer;
         this->optimizer = nullptr;
+        throw e;
     } catch (const exception& e) {
-        cerr << "Exception: " << e.what() << endl;
         delete this->optimizer;
         this->optimizer = nullptr;
+        throw e;
     } catch (...) {
         cerr << "Unknown exception caught" << endl;
         delete this->optimizer;
         this->optimizer = nullptr;
+        exit(1);
     }
 }
 
@@ -181,6 +182,7 @@ void Model::Train(size_t epochs, size_t batch_size, bool display_batch) {
 }
 
 void Model::Train(bool display_batch) {
+    
     Optimize();
 
     size_t epochs = optimizer->best_epochs;

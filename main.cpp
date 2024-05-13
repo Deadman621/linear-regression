@@ -7,10 +7,10 @@ int main(void) {
 
     try {
 
-        Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\Student_Performance.csv"};
+        Data data{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Datasets\\3Dataset.csv"};
         SaveModel s{"D:\\basp\\C++\\Implementing Linear Regression For Predictive Analysis\\Trained Models\\"};
 
-        data.InitializeTrainingData(0.99);
+        data.InitializeTrainingData(0.8);
         Model model{data};
 
 /*         model = s.Load("Student_Performance");
@@ -26,7 +26,7 @@ int main(void) {
         cout << "Error: " << model.MeanAbsolutePercentageError(data) << '%';
         cout << endl << model;
 
-        s.Save(model, "Student_Performance");
+        s.Save(model, "3Dataset");
 
     } catch (const std::ios_base::failure& e) {
         cout << "File operation failed: " << e.what() << endl;
