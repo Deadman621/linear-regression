@@ -4,7 +4,7 @@
 #include<stdexcept>
 #include<regression.h>
 #include<HyperParameterOptimization.h>
-//#include<matplot/matplot.h>
+#include<matplot/matplot.h>
 
 using namespace std;
 
@@ -196,7 +196,7 @@ void Model::Train(bool display_batch) {
 }
 
 void Model::DisplayPlot(void) {
-/*     vector<double> x0, x1, dx0, dx1, dy;
+    vector<double> x0, x1, dx0, dx1, dy;
 
     for (const auto& data_point : x) {
         x0.push_back(data_point[0]);
@@ -234,7 +234,7 @@ void Model::DisplayPlot(void) {
         matplot::view(-30, 1);
         matplot::show();
         cin.get();
-    } */
+    }
 }
 
 vector<double> Model::Predict(const Data& d) const {
